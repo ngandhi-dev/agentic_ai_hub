@@ -1,5 +1,8 @@
-// @ts-check
 import { defineConfig } from 'astro/config';
 
-// https://astro.build/config
-export default defineConfig({});
+export default defineConfig({
+  site: 'https://TechieBott.github.io',
+  base: '/agentic_ai_hub/',
+  output: 'static',
+});
+
