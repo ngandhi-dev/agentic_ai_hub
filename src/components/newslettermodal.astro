@@ -1,0 +1,62 @@
+---
+import NewsletterForm from "./NewsletterForm.astro";
+---
+
+<div id="newsletter-modal" class="modal">
+  <div class="modal-content">
+    <button class="close" onclick="closeNewsletterModal()">×</button>
+
+    <h3>Join Agentsic World</h3>
+    <p>
+      Get practical insights on AI agents, workflows, and real-world use cases.
+    </p>
+
+    <NewsletterForm variant="modal" />
+  </div>
+</div>
+
+<script is:inline>
+  function closeNewsletterModal() {
+    document.getElementById("newsletter-modal").style.display = "none";
+    localStorage.setItem("newsletterDismissed", "true");
+  }
+
+  window.addEventListener("load", () => {
+    if (!localStorage.getItem("newsletterDismissed")) {
+      setTimeout(() => {
+        document.getElementById("newsletter-modal").style.display = "flex";
+      }, 5000);
+    }
+  });
+</script>
+
+<style>
+.modal {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.6);
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+}
+
+.modal-content {
+  background: #fff;
+  padding: 2rem;
+  max-width: 420px;
+  width: 90%;
+  border-radius: 10px;
+  position: relative;
+}
+
+.close {
+  position: absolute;
+  right: 12px;
+  top: 10px;
+  background: none;
+  border: none;
+  font-size: 1.5rem;
+  cursor: pointer;
+}
+</style>

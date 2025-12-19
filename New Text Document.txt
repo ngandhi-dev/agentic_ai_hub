@@ -1,0 +1,17 @@
+Next Improvements
+
+Newsletter signup (Buttondown, Substack, MailerLite)
+
+RSS feed
+
+Dark mode
+
+SEO meta tags
+
+Scheduled builds
+
+If you want, I can:
+✅ Customize this for news aggregation
+✅ Add RSS scraping
+✅ Add search & tags
+✅ Convert this to Next.js or Hugo

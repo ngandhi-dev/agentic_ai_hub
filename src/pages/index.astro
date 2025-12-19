@@ -1,7 +1,8 @@
 ---
 import Welcome from '../components/Welcome.astro';
 import Layout from '../layouts/Layout.astro';
-
+import NewsletterForm from "../components/NewsletterForm.astro";
+---
 // Welcome to Astro! Wondering what to do next? Check out the Astro documentation at https://docs.astro.build
 // Don't want to use any of this? Delete everything in this file, the `assets`, `components`, and `layouts` directories, and start fresh.
 ---
@@ -9,3 +10,13 @@ import Layout from '../layouts/Layout.astro';
 <Layout>
 	<Welcome />
 </Layout>
+
+<section>
+  <h2>Stay ahead in the Agentsic Era</h2>
+  <p>
+    Research, tools, and insights on autonomous agents — no spam.
+  </p>
+
+  <NewsletterForm variant="inline" />
+</section>
+

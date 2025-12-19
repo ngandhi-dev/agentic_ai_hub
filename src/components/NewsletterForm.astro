@@ -1,0 +1,50 @@
+---
+const { variant = "inline" } = Astro.props;
+---
+
+<form
+  class={`newsletter-form newsletter-form--${variant}`}
+  action="https://buttondown.email/api/emails/embed-subscribe/agentsicworld"
+  method="post"
+  target="popupwindow"
+  onsubmit="window.open('https://buttondown.email/agentsicworld', 'popupwindow')"
+>
+  <input
+    type="email"
+    name="email"
+    placeholder="Enter your email"
+    required
+    aria-label="Email address"
+  />
+  <button type="submit">
+    Subscribe
+  </button>
+</form>
+
+<style>
+.newsletter-form {
+  display: flex;
+  gap: 0.75rem;
+  max-width: 420px;
+}
+
+.newsletter-form input {
+  flex: 1;
+  padding: 0.65rem 0.75rem;
+  border-radius: 6px;
+  border: 1px solid #ccc;
+}
+
+.newsletter-form button {
+  padding: 0.65rem 1rem;
+  border-radius: 6px;
+  border: none;
+  cursor: pointer;
+  background: #111;
+  color: #fff;
+}
+
+.newsletter-form--footer {
+  max-width: 100%;
+}
+</style>
