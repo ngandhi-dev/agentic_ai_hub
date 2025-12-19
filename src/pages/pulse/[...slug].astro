@@ -1,6 +1,6 @@
 ---
 import { getCollection } from 'astro:content';
-import IssueLayout from '../../layouts/IssueLayout.astro';
+import IssueLayout from '../../layouts/IssueLayout.astro'; // Your main site layout
 
 export async function getStaticPaths() {
   const entries = await getCollection('pulse');
@@ -8,10 +8,26 @@ export async function getStaticPaths() {
     params: { slug: entry.slug }, props: { entry },
   }));
 }
+
 const { entry } = Astro.props;
 const { Content } = await entry.render();
 ---
-<IssueLayout frontmatter={entry.data}>
-  <div class="content"> <Content />
-  </div>
+
+<IssueLayout title={entry.data.title}>
+  <main>
+    <div class="content">
+      <h1>{entry.data.title}</h1>
+      <Content />
+    </div>
+  </main>
 </IssueLayout>
+
+<style>
+  /* Optional: Add some basic padding for the standalone page view */
+  .content {
+    max-width: 800px;
+    margin: 100px auto;
+    padding: 20px;
+    line-height: 1.6;
+  }
+</style>
