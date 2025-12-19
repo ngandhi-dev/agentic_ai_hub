@@ -1,0 +1,226 @@
+---
+import Layout from '../layouts/Layout.astro';
+import Navigation from '../components/Navigation.astro';
+import Footer from '../components/Footer.astro';
+
+// Mock Data for May 2025
+const archives = [
+  {
+    date: "May 28, 2025",
+    title: "The Rise of Multi-Agent Swarms",
+    excerpt: "Exploring how OpenAI's latest framework allows 100+ agents to collaborate on a single codebase.",
+    tag: "Frameworks",
+    readTime: "5 min",
+    href: "/pulse/issue-4"
+  },
+  {
+    date: "May 21, 2025",
+    title: "Autonomous Debugging is Here",
+    excerpt: "New research from Anthropic shows agents can now fix 80% of production bugs without human intervention.",
+    tag: "Research",
+    readTime: "4 min",
+    href: "/pulse/issue-3"
+  },
+  {
+    date: "May 14, 2025",
+    title: "Agentic Stack: Summer 2025 Edition",
+    excerpt: "Our curated list of the top 10 tools every AI Engineer needs in their local environment.",
+    tag: "Tools",
+    readTime: "6 min",
+    href: "/pulse/issue-2"
+  },
+  {
+    date: "May 07, 2025",
+    title: "The First Pulse: Welcome to the Future",
+    excerpt: "Setting the stage for autonomous systems and why the 'Agentic' era is different from the LLM era.",
+    tag: "Manifesto",
+    readTime: "3 min",
+    href: "/pulse/pulse-1"
+  }
+];
+---
+
+<Layout title="Archive | Agentic Pulse">
+  <Navigation />
+  
+  <main class="archive-main">
+    <section class="archive-hero">
+      <div class="container">
+        <span class="badge">KNOWLEDGE HUB</span>
+        <h1>Agentic Pulse Archive</h1>
+        <p>The definitive timeline of the autonomous agent revolution. Starting May 2025.</p>
+      </div>
+    </section>
+
+    <section class="archive-list">
+      <div class="container">
+        
+        <div class="month-group">
+          <h2 class="month-title">May 2025</h2>
+          <div class="grid">
+            {archives.map(issue => (
+              <a href={issue.href} class="issue-card">
+                <div class="card-top">
+                  <span class="tag">{issue.tag}</span>
+                  <span class="read-time">{issue.readTime}</span>
+                </div>
+                <h3>{issue.title}</h3>
+                <p>{issue.excerpt}</p>
+                <div class="card-footer">
+                  <span class="date">{issue.date}</span>
+                  <span class="arrow">Read Issue →</span>
+                </div>
+              </a>
+            ))}
+          </div>
+        </div>
+
+      </div>
+    </section>
+  </main>
+
+  <Footer />
+</Layout>
+
+<style>
+  .archive-main {
+    padding-top: 80px; /* Space for fixed nav */
+    background-color: #ffffff;
+    min-height: 100vh;
+    font-family: 'Inter', sans-serif;
+  }
+
+  .container {
+    max-width: 1100px;
+    margin: 0 auto;
+    padding: 0 20px;
+  }
+
+  /* Hero Styling */
+  .archive-hero {
+    background-color: #0f172a; /* Midnight Blue */
+    padding: 100px 0;
+    color: white;
+    text-align: center;
+  }
+
+  .archive-hero h1 {
+    font-size: 3.5rem;
+    font-weight: 900;
+    letter-spacing: -0.04em;
+    margin-bottom: 20px;
+  }
+
+  .archive-hero p {
+    font-size: 1.25rem;
+    color: #94a3b8;
+    max-width: 600px;
+    margin: 0 auto;
+  }
+
+  .badge {
+    color: #60a5fa;
+    font-weight: 800;
+    font-size: 0.8rem;
+    letter-spacing: 0.1em;
+    display: block;
+    margin-bottom: 12px;
+  }
+
+  /* Month Headers */
+  .month-title {
+    font-size: 1.5rem;
+    font-weight: 800;
+    color: #0f172a;
+    margin: 60px 0 30px;
+    padding-bottom: 10px;
+    border-bottom: 2px solid #f1f5f9;
+  }
+
+  /* Card Grid */
+  .grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
+    gap: 30px;
+  }
+
+  .issue-card {
+    text-decoration: none;
+    display: flex;
+    flex-direction: column;
+    padding: 30px;
+    background: #ffffff;
+    border: 1px solid #e2e8f0;
+    border-radius: 20px;
+    transition: all 0.3s ease;
+  }
+
+  .issue-card:hover {
+    transform: translateY(-8px);
+    border-color: #3b82f6;
+    box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.05);
+  }
+
+  .card-top {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 20px;
+  }
+
+  .tag {
+    background: #eff6ff;
+    color: #2563eb;
+    font-size: 0.75rem;
+    font-weight: 700;
+    padding: 4px 12px;
+    border-radius: 99px;
+    text-transform: uppercase;
+  }
+
+  .read-time {
+    font-size: 0.75rem;
+    color: #94a3b8;
+    font-weight: 600;
+  }
+
+  .issue-card h3 {
+    font-size: 1.4rem;
+    font-weight: 800;
+    color: #000000;
+    margin-bottom: 12px;
+    line-height: 1.2;
+  }
+
+  .issue-card p {
+    font-size: 1rem;
+    color: #475569;
+    line-height: 1.5;
+    margin-bottom: 24px;
+    flex-grow: 1; /* Pushes footer to bottom */
+  }
+
+  .card-footer {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding-top: 20px;
+    border-top: 1px solid #f1f5f9;
+  }
+
+  .date {
+    font-size: 0.85rem;
+    color: #94a3b8;
+    font-weight: 500;
+  }
+
+  .arrow {
+    font-size: 0.85rem;
+    font-weight: 700;
+    color: #2563eb;
+  }
+
+  @media (max-width: 768px) {
+    .archive-hero h1 { font-size: 2.5rem; }
+    .grid { grid-template-columns: 1fr; }
+  }
+</style>

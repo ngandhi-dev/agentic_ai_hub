@@ -1,0 +1,164 @@
+---
+// src/components/InsideIssue.astro
+const checkmarks = [
+  "Deep Dive into Agentic Frameworks",
+  "Curated Weekly Stack Reviews",
+  "The Latest Research Papers (Simplified)",
+  "Open Source Tool Spotlights",
+  "Upcoming AI Agent Events & Hackathons"
+];
+---
+
+<section class="inside-section">
+  <div class="inside-container">
+    
+    <div class="inside-text">
+      <span class="badge">THE BLUEPRINT</span>
+      <h2>What's Inside Every Issue</h2>
+      <p>
+        We cut through the noise of the AI hype cycle. Every Tuesday, you'll receive a condensed, high-signal report designed for developers and architects building the future of autonomous agents.
+      </p>
+      
+      <ul class="check-list">
+        {checkmarks.map(item => (
+          <li>
+            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#2563eb" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+            <span>{item}</span>
+          </li>
+        ))}
+      </ul>
+    </div>
+
+    <div class="inside-visual">
+      <div class="preview-card">
+        <div class="card-header">
+          <div class="dot red"></div>
+          <div class="dot yellow"></div>
+          <div class="dot green"></div>
+        </div>
+        <div class="card-body">
+          <div class="skeleton-line long"></div>
+          <div class="skeleton-line mid"></div>
+          <div class="skeleton-line short"></div>
+          <div class="skeleton-block"></div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<style>
+  .inside-section {
+    background-color: #f8fafc; /* Subtle gray background to separate from white sections */
+    padding: 120px 20px;
+    font-family: 'Inter', sans-serif;
+  }
+
+  .inside-container {
+    max-width: 1100px;
+    margin: 0 auto;
+    display: flex;
+    align-items: center;
+    gap: 80px;
+  }
+
+  .inside-text {
+    flex: 1;
+  }
+
+  .badge {
+    color: #2563eb;
+    font-weight: 800;
+    font-size: 0.75rem;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    margin-bottom: 12px;
+    display: block;
+  }
+
+  .inside-text h2 {
+    font-size: 2.5rem;
+    font-weight: 800;
+    color: #000000;
+    margin-bottom: 24px;
+    line-height: 1.1;
+  }
+
+  .inside-text p {
+    font-size: 1.1rem;
+    color: #475569;
+    line-height: 1.6;
+    margin-bottom: 32px;
+  }
+
+  .check-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: grid;
+    gap: 16px;
+  }
+
+  .check-list li {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    font-weight: 600;
+    color: #1e293b;
+  }
+
+  /* Right Side Visual */
+  .inside-visual {
+    flex: 1;
+    display: flex;
+    justify-content: center;
+  }
+
+  .preview-card {
+    width: 100%;
+    max-width: 400px;
+    background: #ffffff;
+    border: 1px solid #e2e8f0;
+    border-radius: 12px;
+    box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
+    overflow: hidden;
+  }
+
+  .card-header {
+    background: #f1f5f9;
+    padding: 12px;
+    display: flex;
+    gap: 6px;
+  }
+
+  .dot { width: 8px; height: 8px; border-radius: 50%; }
+  .red { background: #ff5f56; }
+  .yellow { background: #ffbd2e; }
+  .green { background: #27c93f; }
+
+  .card-body {
+    padding: 30px;
+  }
+
+  .skeleton-line { height: 10px; background: #e2e8f0; border-radius: 4px; margin-bottom: 15px; }
+  .long { width: 90%; }
+  .mid { width: 70%; }
+  .short { width: 40%; }
+  .skeleton-block { height: 100px; background: #f1f5f9; border-radius: 8px; margin-top: 20px; }
+
+  /* Responsive Layout */
+  @media (max-width: 900px) {
+    .inside-container {
+      flex-direction: column;
+      gap: 50px;
+      text-align: center;
+    }
+    .check-list {
+      justify-items: center;
+    }
+    .inside-text h2 {
+      font-size: 2rem;
+    }
+  }
+</style>

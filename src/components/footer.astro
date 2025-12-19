@@ -1,21 +1,75 @@
 ---
-import NewsletterForm from "./NewsletterForm.astro";
+// src/components/Footer.astro
+const currentYear = new Date().getFullYear();
 ---
 
-<footer>
-  <div class="footer-newsletter">
-    <h4>Join the Agentsic World Newsletter</h4>
-    <NewsletterForm variant="footer" />
+<footer class="site-footer">
+  <div class="footer-container">
+    <div class="footer-content">
+      <p class="copyright">
+        {currentYear} Agentic World - Your own AI Agent community
+      </p>
+      <nav class="footer-links">
+        <a href="/privacy">Privacy Policy</a>
+        <a href="/terms">Terms</a>
+      </nav>
+    </div>
   </div>
 </footer>
 
 <style>
-footer {
-  padding: 3rem 1.5rem;
-  border-top: 1px solid #eee;
-}
+  .site-footer {
+    width: 100%;
+    background-color: #ffffff;
+    padding: 40px 0;
+    border-top: 1px solid #f1f5f9;
+    font-family: 'Inter', system-ui, sans-serif;
+  }
 
-.footer-newsletter {
-  max-width: 600px;
-}
+  .footer-container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 40px;
+  }
+
+  .footer-content {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+
+  .copyright {
+    font-size: 0.9rem;
+    color: #64748b;
+    margin: 0;
+  }
+
+  .footer-links {
+    display: flex;
+    gap: 24px;
+  }
+
+  .footer-links a {
+    text-decoration: none;
+    font-size: 0.85rem;
+    color: #64748b;
+    font-weight: 500;
+    transition: color 0.2s ease;
+  }
+
+  .footer-links a:hover {
+    color: #000000;
+  }
+
+  @media (max-width: 768px) {
+    .footer-content {
+      flex-direction: column;
+      gap: 16px;
+      text-align: center;
+    }
+    
+    .footer-links {
+      justify-content: center;
+    }
+  }
 </style>

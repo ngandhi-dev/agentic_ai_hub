@@ -1,0 +1,159 @@
+---
+// src/components/SourceMonitor.astro
+const categories = [
+  { label: "Model Labs", sources: "OpenAI, Anthropic, Google DeepMind, Meta AI" },
+  { label: "Frameworks", sources: "LangChain, AutoGPT, CrewAI, Microsoft Autogen" },
+  { label: "Research", sources: "arXiv, Stanford HAI, MIT CSAIL, HuggingFace" },
+  { label: "Developer Hubs", sources: "GitHub Trends, IndieHackers, Vercel" }
+];
+---
+
+<section class="source-section">
+  <div class="source-container">
+    
+    <div class="source-header">
+      <div class="live-indicator">
+        <span class="ping"></span>
+        LIVE MONITOR ACTIVE
+      </div>
+      <h2>I Monitor <span class="highlight">50+</span> Premium Sources</h2>
+      <p>Continuous automated scanning across model labs, research papers, and technical repos.</p>
+    </div>
+
+    <div class="source-grid">
+      {categories.map(cat => (
+        <div class="source-card">
+          <span class="cat-label">{cat.label}</span>
+          <p class="cat-sources">{cat.sources}</p>
+        </div>
+      ))}
+    </div>
+
+    <div class="source-footer">
+      <p>+ 120 more technical feeds, discord servers, and private beta channels</p>
+    </div>
+
+  </div>
+</section>
+
+<style>
+  .source-section {
+    padding: 80px 20px;
+    background-color: #ffffff;
+    font-family: 'Inter', sans-serif;
+  }
+
+  .source-container {
+    max-width: 1000px;
+    margin: 0 auto;
+    background: linear-gradient(135deg, #334266ff 50%, #5877ccff 100%, #5c51ceff 0%);
+    border-radius: 32px;
+    padding: 60px 40px;
+    color: white;
+    text-align: center;
+    position: relative;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+  }
+
+  .source-header h2 {
+    font-size: 2.5rem;
+    font-weight: 800;
+    margin-bottom: 16px;
+    letter-spacing: -0.03em;
+  }
+
+  .highlight {
+    color: #60a5fa; /* Electric blue */
+  }
+
+  .source-header p {
+    color: #94a3b8;
+    max-width: 600px;
+    margin: 0 auto 48px;
+    font-size: 1.1rem;
+  }
+
+  /* Live Indicator Style */
+  .live-indicator {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    background: rgba(96, 165, 250, 0.1);
+    color: #60a5fa;
+    padding: 6px 16px;
+    border-radius: 99px;
+    font-size: 0.75rem;
+    font-weight: 800;
+    margin-bottom: 24px;
+    border: 1px solid rgba(96, 165, 250, 0.2);
+  }
+
+  .ping {
+    width: 8px;
+    height: 8px;
+    background-color: #60a5fa;
+    border-radius: 50%;
+    position: relative;
+  }
+
+  .ping::after {
+    content: '';
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    background-color: #60a5fa;
+    border-radius: 50%;
+    animation: pulse 2s infinite;
+  }
+
+  @keyframes pulse {
+    0% { transform: scale(1); opacity: 1; }
+    100% { transform: scale(3); opacity: 0; }
+  }
+
+  .source-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 20px;
+    margin-bottom: 40px;
+  }
+
+  .source-card {
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    padding: 24px;
+    border-radius: 20px;
+    text-align: left;
+    transition: background 0.3s;
+  }
+
+  .source-card:hover {
+    background: rgba(255, 255, 255, 0.06);
+  }
+
+  .cat-label {
+    display: block;
+    font-size: 0.75rem;
+    font-weight: 800;
+    color: #60a5fa;
+    margin-bottom: 8px;
+    text-transform: uppercase;
+  }
+
+  .cat-sources {
+    font-size: 0.95rem;
+    color: #f1f5f9;
+    font-weight: 500;
+    line-height: 1.5;
+  }
+
+  .source-footer p {
+    font-size: 0.85rem;
+    color: #64748b;
+  }
+
+  @media (max-width: 600px) {
+    .source-container { padding: 40px 20px; }
+    .source-header h2 { font-size: 1.8rem; }
+  }
+</style>

@@ -1,0 +1,200 @@
+---
+import Layout from './Layout.astro';
+import Navigation from '../components/Navigation.astro';
+import Footer from '../components/Footer.astro';
+
+const { frontmatter } = Astro.props;
+---
+
+<Layout title={`${frontmatter.title} | Agentic Pulse`}>
+  <Navigation />
+  
+  <main class="reading-area">
+    <div id="progress-bar"></div>
+
+    <article class="prose">
+      <header class="issue-header">
+        <div class="meta-top">
+          <span class="tag-badge">{frontmatter.tag}</span>
+          <time>{frontmatter.date.toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })}</time>
+        </div>
+        <h1>{frontmatter.title}</h1>
+        <div class="reading-meta">
+          <div class="author">
+            <div class="avatar">AP</div>
+            <span>By Agentic Pulse Editorial</span>
+          </div>
+          <span class="dot">•</span>
+          <span>{frontmatter.readTime} read</span>
+        </div>
+      </header>
+
+      <div class="content">
+        <slot />
+      </div>
+      
+      <footer class="issue-footer">
+        <p>Enjoyed this issue? Share it with a fellow AI engineer.</p>
+        <div class="share-buttons">
+            <button class="share-btn">Copy Link</button>
+            <button class="share-btn">Twitter / X</button>
+        </div>
+      </footer>
+    </article>
+  </main>
+  <Footer />
+</Layout>
+
+<style>
+  .reading-area {
+    padding: 120px 20px;
+    background-color: #ffffff;
+    min-height: 100vh;
+  }
+
+  /* Typography System */
+  .prose {
+    max-width: 720px;
+    margin: 0 auto;
+    font-family: 'Inter', system-ui, sans-serif;
+    color: #1e293b;
+    line-height: 1.8;
+  }
+
+  .issue-header {
+    margin-bottom: 60px;
+    text-align: center;
+  }
+
+  .meta-top {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 20px;
+    font-size: 0.9rem;
+    color: #64748b;
+  }
+
+  .tag-badge {
+    background: #eff6ff;
+    color: #2563eb;
+    padding: 4px 12px;
+    border-radius: 99px;
+    font-weight: 700;
+    font-size: 0.75rem;
+  }
+
+  h1 {
+    font-size: 3.5rem;
+    font-weight: 900;
+    color: #0f172a;
+    line-height: 1.1;
+    letter-spacing: -0.04em;
+    margin-bottom: 24px;
+  }
+
+  .reading-meta {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 12px;
+    color: #64748b;
+    font-size: 0.95rem;
+  }
+
+  .author {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .avatar {
+    width: 24px;
+    height: 24px;
+    background: #0f172a;
+    color: white;
+    font-size: 0.6rem;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  /* Styling Markdown Content */
+  .content :global(h2) {
+    font-size: 1.8rem;
+    color: #0f172a;
+    margin-top: 48px;
+    margin-bottom: 20px;
+    font-weight: 800;
+  }
+
+  .content :global(p) {
+    margin-bottom: 24px;
+    font-size: 1.15rem;
+  }
+
+  .content :global(blockquote) {
+    border-left: 4px solid #2563eb;
+    padding-left: 24px;
+    font-style: italic;
+    color: #334155;
+    margin: 40px 0;
+    font-size: 1.25rem;
+  }
+
+  /* Progress Bar */
+  #progress-bar {
+    position: fixed;
+    top: 0;
+    left: 0;
+    height: 4px;
+    background: #2563eb;
+    width: 0%;
+    z-index: 100;
+  }
+
+  .issue-footer {
+    margin-top: 80px;
+    padding-top: 40px;
+    border-top: 1px solid #e2e8f0;
+    text-align: center;
+  }
+
+  .share-buttons {
+    display: flex;
+    justify-content: center;
+    gap: 12px;
+    margin-top: 20px;
+  }
+
+  .share-btn {
+    padding: 10px 20px;
+    border: 1px solid #e2e8f0;
+    background: white;
+    border-radius: 8px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+
+  .share-btn:hover {
+    border-color: #2563eb;
+    color: #2563eb;
+  }
+
+  @media (max-width: 768px) {
+    h1 { font-size: 2.25rem; }
+  }
+</style>
+
+<script>
+  // Simple Scroll Progress Indicator
+  window.onscroll = function() {
+    const winScroll = document.body.scrollTop || document.documentElement.scrollTop;
+    const height = document.documentElement.scrollHeight - document.documentElement.clientHeight;
+    const scrolled = (winScroll / height) * 100;
+    document.getElementById("progress-bar").style.width = scrolled + "%";
+  };
+</script>

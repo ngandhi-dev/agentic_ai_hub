@@ -1,0 +1,164 @@
+---
+import Layout from '../layouts/Layout.astro';
+import Navigation from '../components/Navigation.astro';
+import Footer from '../components/Footer.astro';
+import { getCollection } from 'astro:content';
+
+// Pulling real external data from /src/content/pulse/
+const allIssues = await getCollection('pulse');
+const archives = allIssues.sort((a, b) => b.data.date.getTime() - a.data.date.getTime());
+---
+
+<Layout title="Archive | Agentic Pulse">
+  <Navigation />
+  
+  <main class="archive-main">
+    <section class="archive-hero">
+      <div class="container">
+        <span class="badge">LATEST UPDATES</span>
+        <h1>Agentic Pulse Archive</h1>
+        <p>Your technical timeline for autonomous AI Agent breakthroughs.</p>
+      </div>
+    </section>
+
+    <section class="archive-list">
+      <div class="container">
+        <div class="grid">
+          {archives.map(issue => (
+            <div class="issue-card-trigger" data-slug={issue.slug}>
+              <div class="card-top">
+                <span class="tag">{issue.data.tag}</span>
+                <span class="read-time">{issue.data.readTime}</span>
+              </div>
+              <h3>{issue.data.title}</h3>
+              <p>{issue.data.excerpt}</p>
+              <div class="card-footer">
+                <span class="date">{issue.data.date.toLocaleDateString()}</span>
+                <span class="arrow">Quick View →</span>
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <div id="reader-modal" class="modal-backdrop">
+    <div class="modal-window">
+      <div class="modal-nav">
+         <span class="modal-logo">Agentic Pulse Reader</span>
+         <button id="close-modal">&times;</button>
+      </div>
+      <div id="modal-content-area" class="modal-body">
+        <div class="loading-state">
+          <div class="spinner"></div>
+          <p>Fetching the pulse...</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <Footer />
+</Layout>
+
+<style>
+  /* Basic Styles */
+  .archive-main { padding-top: 80px; min-height: 100vh; font-family: 'Inter', sans-serif; }
+  .container { max-width: 1100px; margin: 0 auto; padding: 0 20px; }
+  
+  .archive-hero { background: #0f172a; padding: 80px 0; color: white; text-align: center; }
+  .archive-hero h1 { font-size: 3rem; font-weight: 900; letter-spacing: -0.04em; }
+  
+  .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(340px, 1fr)); gap: 30px; margin-top: 60px; padding-bottom: 100px; }
+  
+  .issue-card-trigger { 
+    background: white; border: 1px solid #e2e8f0; padding: 30px; border-radius: 20px; 
+    cursor: pointer; transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); 
+  }
+  .issue-card-trigger:hover { border-color: #2563eb; transform: translateY(-8px); box-shadow: 0 20px 25px -5px rgba(0,0,0,0.05); }
+
+  .tag { background: #eff6ff; color: #2563eb; font-size: 0.7rem; font-weight: 700; padding: 4px 10px; border-radius: 99px; text-transform: uppercase; }
+  .read-time { font-size: 0.75rem; color: #94a3b8; font-weight: 600; }
+  h3 { font-size: 1.4rem; font-weight: 800; margin: 15px 0 10px; color: #0f172a; }
+  
+  /* Modal Animation & Layout */
+  .modal-backdrop { 
+    position: fixed; inset: 0; background: rgba(15, 23, 42, 0.8); 
+    backdrop-filter: blur(12px); z-index: 1000; display: none; 
+    align-items: center; justify-content: center; padding: 20px;
+  }
+  .modal-backdrop.open { display: flex; }
+  
+  .modal-window { 
+    background: #fff; width: 100%; max-width: 850px; height: 85vh; 
+    border-radius: 32px; overflow: hidden; display: flex; flex-direction: column;
+    animation: slideUp 0.3s ease-out;
+  }
+  
+  @keyframes slideUp {
+    from { transform: translateY(20px); opacity: 0; }
+    to { transform: translateY(0); opacity: 1; }
+  }
+
+  .modal-nav { padding: 20px 40px; border-bottom: 1px solid #f1f5f9; display: flex; justify-content: space-between; align-items: center; }
+  #close-modal { font-size: 2.5rem; border: none; background: none; cursor: pointer; color: #64748b; }
+
+  .modal-body { padding: 60px 80px; overflow-y: auto; line-height: 1.8; color: #334155; }
+
+  /* Injected Content Styles */
+  .modal-body :global(h1) { font-size: 3rem; font-weight: 900; color: #0f172a; margin-bottom: 24px; }
+  .modal-body :global(h2) { font-size: 1.8rem; margin-top: 40px; color: #0f172a; font-weight: 800; }
+  .modal-body :global(blockquote) { border-left: 4px solid #2563eb; padding-left: 24px; font-style: italic; margin: 40px 0; color: #1e40af; background: #f8fbff; padding: 20px 30px; border-radius: 0 12px 12px 0; }
+
+  /* Loader */
+  .spinner { width: 40px; height: 40px; border: 4px solid #f3f3f3; border-top: 4px solid #2563eb; border-radius: 50%; animation: spin 1s linear infinite; margin: 0 auto 20px; }
+  @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+  .loading-state { text-align: center; margin-top: 100px; color: #64748b; font-weight: 600; }
+</style>
+
+<script>
+  const modal = document.getElementById('reader-modal');
+  const modalContent = document.getElementById('modal-content-area');
+  const closeBtn = document.getElementById('close-modal');
+  const triggers = document.querySelectorAll('.issue-card-trigger');
+
+  triggers.forEach(trigger => {
+    trigger.addEventListener('click', async () => {
+      const slug = trigger.getAttribute('data-slug');
+      if (!modal || !modalContent) return;
+
+      modal.classList.add('open');
+      document.body.style.overflow = 'hidden';
+
+      try {
+        // We fetch the dynamic route we created earlier
+        const res = await fetch(`/pulse/${slug}`);
+        const html = await res.text();
+        const parser = new DOMParser();
+        const doc = parser.parseFromString(html, 'text/html');
+        
+        // Extract the content from the hidden page's article/content section
+        const content = doc.querySelector('.content')?.innerHTML || 'Content not found.';
+        const title = doc.querySelector('h1')?.innerText || 'Untitled';
+
+        modalContent.innerHTML = `
+          <div style="font-weight: 700; color: #2563eb; margin-bottom: 10px; font-size: 0.8rem;">ISSUE REPLAY</div>
+          <h1>${title}</h1>
+          <div class="article-body">${content}</div>
+        `;
+      } catch (err) {
+        modalContent.innerHTML = `<p>Error loading content. <a href="/pulse/${slug}">Try the direct link.</a></p>`;
+      }
+    });
+  });
+
+  const hideModal = () => {
+    modal?.classList.remove('open');
+    document.body.style.overflow = '';
+    if (modalContent) modalContent.innerHTML = '<div class="loading-state"><div class="spinner"></div><p>Fetching the pulse...</p></div>';
+  };
+
+  closeBtn?.addEventListener('click', hideModal);
+  modal?.addEventListener('click', (e) => { if (e.target === modal) hideModal(); });
+  window.addEventListener('keydown', (e) => { if (e.key === 'Escape') hideModal(); });
+</script>

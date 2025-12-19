@@ -1,21 +1,26 @@
 ---
 import Hero from "../components/Hero.astro";
 import Header from "../components/Header.astro";
-import AboutAuthor from "../components/AboutAuthor.astro";
-import Process from "../components/Process.astro";
-import Topics from "../components/Topics.astro";
-import Testimonials from "../components/Testimonials.astro";
-import FAQ from "../components/FAQ.astro";
-import Sources from "../components/Sources.astro";
+import Footer from '../components/Footer.astro'
+// Import ProcessGrid
+import ProcessGrid from '../components/ProcessGrid.astro';
+// IMport SourceMonitor
+import SourceMonitor from '../components/SourceMonitor.astro';
+// Import InsideIssue
+import InsideIssue from '../components/InsideIssue.astro';
+// Import TrustSection section
+import TrustSection from '../components/TrustSection.astro'
+// Import Testimonial section
+import FooterCTA from '../components/FooterCTA.astro'
 ---
 <Header /> <!-- Use client:load for JS components -->
 <Hero />
-<AboutAuthor />
-<Process />
-<Topics />
-<Testimonials />
-<FAQ />
-<Sources />
+<ProcessGrid />
+<SourceMonitor />
+<InsideIssue />
+<TrustSection />
+<FooterCTA />
+<Footer />
 
 
 

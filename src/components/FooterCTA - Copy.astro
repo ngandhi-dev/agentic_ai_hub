@@ -1,0 +1,152 @@
+---
+// src/components/FooterCTA.astro
+---
+
+<section class="cta-section">
+  <div class="cta-container">
+    <div class="cta-box">
+      <div class="cta-content">
+        <span class="cta-badge">STAY AHEAD</span>
+        <h2>Ready to master the Agentic Stack?</h2>
+        <p>Join a growing community of developers receiving weekly technical deep-dives into the future of autonomous AI.</p>
+        
+        <form class="cta-form" action="#" method="POST">
+          <input type="email" placeholder="Enter your email" required />
+          <button type="submit">Subscribe Free</button>
+        </form>
+        
+        <p class="cta-subtext">
+          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m5 12 5 5L20 7"/></svg>
+          Every Tuesday • 5 min read • No spam ever
+        </p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<style>
+  .cta-section {
+    padding: 100px 20px;
+    background-color: #ffffff;
+    font-family: 'Inter', sans-serif;
+  }
+
+  .cta-container {
+    max-width: 1100px;
+    margin: 0 auto;
+  }
+
+  .cta-box {
+    background-color: #0f172a; /* Midnight Blue from your Hero */
+    border-radius: 24px;
+    padding: 80px 40px;
+    text-align: center;
+    color: #ffffff;
+    position: relative;
+    overflow: hidden;
+    box-shadow: 0 25px 50px -12px rgba(15, 23, 42, 0.25);
+  }
+
+  /* Subtle background glow effect */
+  .cta-box::before {
+    content: '';
+    position: absolute;
+    top: -50%;
+    left: -50%;
+    width: 200%;
+    height: 200%;
+    background: radial-gradient(circle at center, rgba(59, 130, 246, 0.1) 0%, transparent 50%);
+    pointer-events: none;
+  }
+
+  .cta-content {
+    position: relative;
+    z-index: 1;
+    max-width: 600px;
+    margin: 0 auto;
+  }
+
+  .cta-badge {
+    color: #60a5fa;
+    font-weight: 800;
+    font-size: 0.85rem;
+    letter-spacing: 0.15em;
+    margin-bottom: 20px;
+    display: block;
+  }
+
+  .cta-content h2 {
+    font-size: 2.75rem;
+    font-weight: 800;
+    margin-bottom: 20px;
+    letter-spacing: -0.03em;
+    line-height: 1.1;
+  }
+
+  .cta-content p {
+    font-size: 1.1rem;
+    color: #94a3b8;
+    margin-bottom: 40px;
+    line-height: 1.6;
+  }
+
+  .cta-form {
+    display: flex;
+    gap: 12px;
+    max-width: 500px;
+    margin: 0 auto 24px;
+  }
+
+  .cta-form input {
+    flex: 1;
+    padding: 16px 24px;
+    border-radius: 12px;
+    border: 1px solid #334155;
+    background: #1e293b;
+    color: #ffffff;
+    font-size: 1rem;
+    outline: none;
+    transition: border-color 0.2s;
+  }
+
+  .cta-form input:focus {
+    border-color: #60a5fa;
+  }
+
+  .cta-form button {
+    background: #ffffff;
+    color: #000000;
+    font-weight: 700;
+    padding: 16px 32px;
+    border-radius: 12px;
+    border: none;
+    cursor: pointer;
+    transition: transform 0.2s, background-color 0.2s;
+  }
+
+  .cta-form button:hover {
+    background: #e2e8f0;
+    transform: translateY(-2px);
+  }
+
+  .cta-subtext {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    font-size: 0.9rem;
+    color: #64748b !important; /* Forces color */
+  }
+
+  @media (max-width: 600px) {
+    .cta-form {
+      flex-direction: column;
+    }
+    .cta-content h2 {
+      font-size: 2rem;
+    }
+    .cta-box {
+      padding: 60px 20px;
+    }
+  }
+</style>
