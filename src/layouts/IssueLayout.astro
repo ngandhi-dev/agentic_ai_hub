@@ -3,13 +3,22 @@ import Layout from './Layout.astro';
 import Navigation from '../components/Navigation.astro';
 import Footer from '../components/footer.astro';
 
+// src/layouts/IssueLayout.astro
 const { frontmatter } = Astro.props;
-// This ensures that even if it's passed as a string, it becomes a Date object
-const formattedDate = new Date(frontmatter.date).toLocaleDateString('en-US', {
+
+// Defensive check: If date is missing, use today's date as a fallback 
+// so the build doesn't crash.
+const rawDate = frontmatter?.date || new Date();
+
+const formattedDate = new Date(rawDate).toLocaleDateString('en-US', {
   month: 'long',
   day: 'numeric',
   year: 'numeric'
 });
+
+// Fallback for title/tag
+const title = frontmatter?.title || "Untitled Issue";
+const tag = frontmatter?.tag || "Update";
 ---
 
 <Layout title={`${frontmatter.title} | Agentic Pulse`}>
@@ -20,20 +29,12 @@ const formattedDate = new Date(frontmatter.date).toLocaleDateString('en-US', {
 
     <article class="prose">
       <header class="issue-header">
-        <div class="meta-top">
-          <span class="tag-badge">{frontmatter.tag}</span>
-          <time>{formattedDate}</time>
-        </div>
-        <h1>{frontmatter.title}</h1>
-        <div class="reading-meta">
-          <div class="author">
-            <div class="avatar">AP</div>
-            <span>By Agentic Pulse Editorial</span>
-          </div>
-          <span class="dot">•</span>
-          <span>{frontmatter.readTime} read</span>
-        </div>
-      </header>
+    <div class="meta-top">
+      <span class="tag-badge">{tag}</span>
+      <time>{formattedDate}</time>
+    </div>
+    <h1>{title}</h1>
+  </header>
 
       <div class="content">
         <slot />
