@@ -1,8 +1,8 @@
-name: Deploy Astro site to GitHub Pages
+name: Deploy to GitHub Pages
 
 on:
   push:
-    branches: [master]
+    branches: [master] # Ensure this matches your branch name
   workflow_dispatch:
 
 permissions:
@@ -16,25 +16,18 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+
       - name: Install, build, and upload
         uses: withastro/action@v3
-        # - name: Install dependencies
-        #  run: npm ci
-
-        # - name: Build
-        #  run: npm run build
-
-        # - name: Upload Pages artifact
-        #  uses: actions/upload-pages-artifact@v3
-        with:
-          path: dist
+        # No need to specify the dist folder here;
+        # the official action handles the internal logic.
 
   deploy:
+    needs: build
+    runs-on: ubuntu-latest
     environment:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
-    needs: build
-    runs-on: ubuntu-latest
     steps:
       - name: Deploy to GitHub Pages
         id: deployment
