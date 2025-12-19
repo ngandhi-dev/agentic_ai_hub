@@ -1,24 +1,21 @@
 ---
-import Welcome from '../components/Welcome.astro';
-import Layout from '../layouts/Layout.astro';
-import NewsletterForm from "../components/NewsletterForm.astro";
-
-
+import Hero from "../components/Hero.astro";
+import AboutAuthor from "../components/AboutAuthor.astro";
+import Process from "../components/Process.astro";
+import Topics from "../components/Topics.astro";
+import Testimonials from "../components/Testimonials.astro";
+import FAQ from "../components/FAQ.astro";
+import Sources from "../components/Sources.astro";
 ---
 
-<Layout>
-	<Welcome />
-	<ul>
-      <li><a href="/posts/post-1/">Post 1</a></li>
-    </ul>
-	<section>
-  <h2>Stay ahead in the Agentic Era</h2>
-  <p>
-    Research, tools, and insights on autonomous agents — no spam.
-  </p>  
-</section>
-	<NewsletterForm variant="inline" />
-</Layout>
+<Hero />
+<AboutAuthor />
+<Process />
+<Topics />
+<Testimonials />
+<FAQ />
+<Sources />
+
 
 
 

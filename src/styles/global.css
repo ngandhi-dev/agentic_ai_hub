@@ -1,1 +1,16 @@
-@import "tailwindcss";
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+body {
+  @apply font-sans text-gray-800 leading-relaxed;
+}
+
+h1,h2,h3,h4 {
+  @apply font-heading;
+}
+
+section {
+  @apply scroll-mt-24; /* smooth scroll offset for anchor links */
+}
+

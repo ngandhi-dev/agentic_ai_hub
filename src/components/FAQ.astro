@@ -1,0 +1,26 @@
+---
+const faqs = [
+  ["Is this newsletter free?", "Yes, it is always free."],
+  ["How often will I get emails?", "Weekly curated updates only."],
+  ["Who is this for?", "AI researchers, builders, and enthusiasts."],
+];
+---
+
+<section class="max-w-4xl mx-auto px-6 py-24">
+  <h2 class="text-3xl font-bold text-center mb-12">FAQ</h2>
+
+  <div class="space-y-4">
+    {faqs.map(([q,a], i) => (
+      <details class="border rounded-lg p-4 group" key={i}>
+        <summary class="font-semibold cursor-pointer list-none group-open:after:rotate-180 relative">
+          {q}
+          <span class="absolute right-4 top-1/2 -translate-y-1/2 text-indigo-600 transition-transform duration-300 group-open:rotate-180">
+            ▼
+          </span>
+        </summary>
+        <p class="mt-2 text-gray-600">{a}</p>
+      </details>
+    ))}
+  </div>
+</section>
+

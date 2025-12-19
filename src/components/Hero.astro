@@ -1,0 +1,36 @@
+---
+import NewsletterForm from "./NewsletterForm.astro";
+---
+
+<section class="relative overflow-hidden bg-gradient-to-br from-indigo-900 via-indigo-800 to-indigo-900 text-white">
+  <!-- Background shapes (optional) -->
+  <div class="absolute inset-0 -z-10 opacity-30">
+    <svg class="w-full h-full" xmlns="http://www.w3.org/2000/svg">
+      <defs>
+        <radialGradient id="grad1" cx="50%" cy="50%" r="50%">
+          <stop offset="0%" stop-color="rgba(99,102,241,0.4)" />
+          <stop offset="100%" stop-color="transparent" />
+        </radialGradient>
+      </defs>
+      <circle cx="25%" cy="25%" r="300" fill="url(#grad1)" />
+      <circle cx="75%" cy="75%" r="400" fill="url(#grad1)" />
+    </svg>
+  </div>
+
+  <!-- Newsletter content inside full gradient section -->
+  <div class="relative max-w-4xl mx-auto px-6 py-32 text-center">
+    <h1 class="text-5xl md:text-6xl font-extrabold leading-tight tracking-tight">
+      Agentsic World
+    </h1>
+
+    <p class="mt-6 text-xl text-indigo-100">
+      Curated insights, tools, and workflows on autonomous agents and AI systems.
+    </p>
+
+    <div class="mt-10 flex justify-center">
+      <NewsletterForm />
+    </div>
+  </div>
+</section>
+
+
