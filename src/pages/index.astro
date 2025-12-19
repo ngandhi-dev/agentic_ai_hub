@@ -1,5 +1,6 @@
 ---
 import Hero from "../components/Hero.astro";
+import Header from "../components/Header.astro";
 import AboutAuthor from "../components/AboutAuthor.astro";
 import Process from "../components/Process.astro";
 import Topics from "../components/Topics.astro";
@@ -7,7 +8,7 @@ import Testimonials from "../components/Testimonials.astro";
 import FAQ from "../components/FAQ.astro";
 import Sources from "../components/Sources.astro";
 ---
-
+<Header /> <!-- Use client:load for JS components -->
 <Hero />
 <AboutAuthor />
 <Process />

@@ -1,0 +1,78 @@
+---
+// You can add props here if you want to make the text dynamic later
+---
+
+<section id="hero-section" class="gradient-bg py-20 px-4 sm:px-6 lg:px-8">
+  <div class="max-w-4xl mx-auto text-center">
+    
+    <div class="mb-8">
+      <div class="inline-block bg-white/10 backdrop-blur-sm rounded-full px-6 py-2 mb-6 border border-white/20">
+        <h1 class="text-white/90 text-sm font-medium">🤖 Welcome to the Agentic Era</h1>
+      </div>
+    </div>
+
+    <h1 class="text-4xl sm:text-5xl lg:text-6xl font-bold text-white mb-6 leading-tight">
+      The Agentic Pulse (weekly curated AI Agent Information) <br class="hidden sm:block" /> delivered to your inbox.
+    </h1>
+
+    <p class="text-xl sm:text-2xl text-white/90 mb-8 leading-relaxed max-w-3xl mx-auto">
+      I scan <span class="font-bold text-white">200+ AI sources</span> daily to bring you the <span class="font-bold text-white">latest breakthroughs</span> in autonomous agents every morning.
+    </p>
+
+    <div class="max-w-md mx-auto mb-6">
+      <form class="flex flex-col sm:flex-row gap-3" action="#" method="POST">
+        <input 
+          type="email" 
+          name="email" 
+          placeholder="Enter your email" 
+          required 
+          class="flex-1 px-6 py-4 rounded-lg text-gray-900 placeholder-gray-500 focus:outline-none focus:ring-4 focus:ring-blue-400 text-lg"
+        />
+        <button 
+          type="submit" 
+          class="px-8 py-4 bg-gray-900 text-white font-semibold rounded-lg hover:bg-black transition-all text-lg whitespace-nowrap shadow-xl"
+        >
+          Join Agentic Pulse
+        </button>
+      </form>
+    </div>
+
+    <div class="mb-6 max-w-2xl mx-auto">
+      <ul class="text-white/90 text-base flex justify-center gap-4">
+        <li>✓ News</li>
+        <li>✓ Frameworks</li>
+        <li>✓ Daily Digest</li>
+      </ul>
+    </div>
+
+    <div class="flex items-center justify-center gap-2 text-white/90 mb-6">
+      <div class="flex -space-x-2">
+        <img src="https://i.pravatar.cc/100?img=1" alt="User" class="w-8 h-8 rounded-full border-2 border-white">
+        <img src="https://i.pravatar.cc/100?img=2" alt="User" class="w-8 h-8 rounded-full border-2 border-white">
+        <img src="https://i.pravatar.cc/100?img=3" alt="User" class="w-8 h-8 rounded-full border-2 border-white">
+      </div>
+      <p class="text-sm font-medium">Join 500+ AI engineers & researchers</p>
+    </div>
+
+    <div class="text-center">
+      <a href="/archive/" class="text-white/90 hover:text-white text-sm underline">
+        Read the latest issue →
+      </a>
+    </div>
+  </div>
+</section>
+
+<style>
+  .gradient-bg {
+    /* Using a "Digital Blue/Purple" gradient for an AI feel */
+    background: linear-gradient(135deg, #5c7fe0ff 0%, #8b58ddff 100%);
+  }
+
+  /* Pulse animation for the button to make it "Agentic" */
+  button:hover {
+    transform: scale(1.02);
+  }
+</style>
+
+
+

@@ -1,36 +1,244 @@
 ---
-import NewsletterForm from "./NewsletterForm.astro";
+// Midnight Blue Hero with All-White Typography
 ---
 
-<section class="relative overflow-hidden bg-gradient-to-br from-indigo-900 via-indigo-800 to-indigo-900 text-white">
-  <!-- Background shapes (optional) -->
-  <div class="absolute inset-0 -z-10 opacity-30">
-    <svg class="w-full h-full" xmlns="http://www.w3.org/2000/svg">
-      <defs>
-        <radialGradient id="grad1" cx="50%" cy="50%" r="50%">
-          <stop offset="0%" stop-color="rgba(99,102,241,0.4)" />
-          <stop offset="100%" stop-color="transparent" />
-        </radialGradient>
-      </defs>
-      <circle cx="25%" cy="25%" r="300" fill="url(#grad1)" />
-      <circle cx="75%" cy="75%" r="400" fill="url(#grad1)" />
-    </svg>
-  </div>
-
-  <!-- Newsletter content inside full gradient section -->
-  <div class="relative max-w-4xl mx-auto px-6 py-32 text-center">
-    <h1 class="text-5xl md:text-6xl font-extrabold leading-tight tracking-tight">
-      Agentsic World
+<section id="hero-section" class="hero-container gradient-bg py-24 px-4">
+  <div class="max-w-4xl mx-auto text-center flex flex-col items-center">
+    <h1 class="hero-title text-white">
+      Stop searching for <br class="hidden sm:block" /> quality Agentic AI content
     </h1>
 
-    <p class="mt-6 text-xl text-indigo-100">
-      Curated insights, tools, and workflows on autonomous agents and AI systems.
+    <p class="hero-subtitle text-white/90">
+      We scan <span class="highlight font-bold text-white">100+ AI sources</span> daily to bring you the <span class="font-bold text-white">latest breakthroughs</span> in autonomous agents every morning at 7 AM.
     </p>
 
-    <div class="mt-10 flex justify-center">
-      <NewsletterForm />
+  <div style="width: 100%; max-width: 448px; margin: 40px auto 0 auto; display: block;">
+  
+  <form style="display: flex; flex-direction: row; gap: 12px; justify-content: center; align-items: center;" action="#" method="POST">
+    <input 
+      type="email" 
+      name="email" 
+      placeholder="Enter your email" 
+      required 
+      class="email-input"
+      style="flex: 1; min-width: 0;"
+    />
+    <button 
+      type="submit" 
+      class="submit-btn"
+      style="white-space: nowrap;"
+    >
+      Join Agentic Pulse
+    </button>
+  </form>
+
+  <p style="text-align: center; margin-top: 12px; font-size: 12px; color: rgba(255,255,255,0.5); font-style: italic; width: 100%;">
+    Join our subscriber list for quality content. No spam ever.
+  </p>
+</div>
+
+    <div class="mb-10 w-full" style="display: grid; place-items: center;">
+  
+  <ul style="display: flex; flex-direction: column; align-items: flex-start; gap: 0.75rem; list-style: none; padding: 0; margin: 0; color: rgba(255,255,255,0.8); font-size: 0.875rem;">
+    
+    <li class="feature-item" style="display: flex; align-items: center; gap: 0.5rem; white-space: nowrap;">
+      News & Updates
+    </li>
+    
+    <li class="feature-item" style="display: flex; align-items: center; gap: 0.5rem; white-space: nowrap;">
+      Agent Frameworks
+    </li>
+    
+    <li class="feature-item" style="display: flex; align-items: center; gap: 0.5rem; white-space: nowrap;">
+      Weekly Stack Review
+    </li>
+  </ul>
+</div>
+
+  
+
+    <div class="social-proof pt-8 border-t border-white/10 flex items-center">
+      <div class="avatar-group flex -space-x-3">
+        <img src="https://i.pravatar.cc/100?img=59" alt="User" class="w-10 h-10 rounded-full border-2 border-[#1e3a8a]">
+        <img src="https://i.pravatar.cc/100?img=49" alt="User" class="w-10 h-10 rounded-full border-2 border-[#1e3a8a]">
+        <img src="https://i.pravatar.cc/100?img=68" alt="User" class="w-10 h-10 rounded-full border-2 border-[#1e3a8a]">
+        
+      <p class="text-sm font-semibold"> Join the <span class="bold-link text-white font-bold underline decoration-blue-400">future of autonomy</span></p>
+      </div>
+    </div>
+
+    <div class="mt-8 w-full" style="display: grid; place-items: center;padding-bottom: 80px;" >
+      <a href="/pulse/" style="color: rgba(255, 255, 255, 0.7); font-size: 0.875rem; font-weight: 700; text-decoration: underline; text-underline-offset: 4px; transition: color 0.2s ease;"
+    onmouseover="this.style.color='#ffffff'"
+    onmouseout="this.style.color='rgba(255, 255, 255, 0.7)'">
+        Read the latest issue HERE (No need to subscribe)
+      </a>
     </div>
   </div>
 </section>
 
+<style>
+  .gradient-bg {
+    /* Deeper Midnight Blue to Indigo */
+    background: linear-gradient(135deg, #334266ff 0%, #5877ccff 50%, #5c51ceff 100%);
+    background-size: 200% 200%;
+    min-height: 60vh;
+    display: flex;
+    align-items: center;
+    animation: gradientMove 15s ease infinite;
+  }
 
+  /* Optional: Soft animation to make the background feel "alive" */
+  @keyframes gradientMove {
+    0% { background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
+    100% { background-position: 0% 50%; }
+  }
+
+  h1 {
+    letter-spacing: -0.03em;
+  }
+  /* Target all typography within the hero to be white by default */
+  #hero-section h1, 
+  #hero-section p, 
+  #hero-section li {
+    color: #ffffff;
+  }
+
+  /* Specific helper for your request */
+  .text-white {
+    color: #ffffff !important;
+  }
+
+
+/* Base Container with Midnight Blue Gradient */
+  .hero-container {
+    background: linear-gradient(135deg, #0f172a 0%, #1e3a8a 50%, #4338ca 100%);
+    font-family: 'Inter', sans-serif; /* Global Body Font */
+    /* Ensure the section takes up significant height and centers content vertically */
+    min-height: 70vh;
+    display: flex;
+    align-items: center; /* Vertical center */
+    justify-content: center; /* Horizontal center */
+  }
+
+  /* Heading Font - Modern Geometric */
+  .hero-title {
+    font-family: 'Plus Jakarta Sans', sans-serif;
+    font-size: clamp(2.5rem, 6vw, 4rem); /* Responsive font size */
+    font-weight: 800;
+    color: white;
+    line-height: 1.1;
+    letter-spacing: -0.03em;
+    margin-bottom: 1.5rem;
+    text-align: center; /* Ensures text wraps toward the center */
+  }
+  .hero-subtitle {
+    font-size: 1.25rem;
+    color: rgba(255, 255, 255, 0.9);
+    line-height: 1.6;
+    max-width: 600px; /* Limits width to keep lines readable while centered */
+    margin: 0 auto; /* Centers the paragraph block itself */
+    text-align: center;
+  }
+
+  .badge-text {
+    font-size: 0.875rem;
+    font-weight: 500;
+    color: white;
+  }
+
+  .highlight {
+    font-weight: 700;
+    color: white;
+  }
+
+  /* Form Elements */
+  .email-input {
+    flex: 1;
+    padding: 1rem 1.5rem;
+    border-radius: 0.75rem;
+    background: rgba(255, 255, 255, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    color: white;
+    font-size: 1.125rem;
+    backdrop-filter: blur(8px);
+    outline: none;
+    transition: all 0.2s;
+    margin: 0 auto; /* Centers the paragraph block itself */
+  }
+
+  .email-input:focus {
+    border-color: #60a5fa;
+    box-shadow: 0 0 0 4px rgba(96, 165, 250, 0.3);
+  }
+
+  .submit-btn {
+    padding: 1rem 2rem;
+    background: white;
+    color: #1e3a8a;
+    font-weight: 700;
+    border-radius: 0.75rem;
+    font-size: 1.125rem;
+    transition: all 0.2s;
+    cursor: pointer;
+    margin: 0 auto; /* Centers the paragraph block itself */
+  }
+
+  .submit-btn:hover {
+    background: #f1f5f9;
+    transform: translateY(-2px);
+    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.2);
+  }
+
+  .form-subtext {
+    margin-top: 0.75rem;
+    font-size: 0.75rem;
+    color: rgba(255, 255, 255, 0.5);
+    font-style: italic;
+  }
+
+  /* Social Proof Styles */
+  .social-proof {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.75rem;
+    color: rgba(255, 255, 255, 0.9);
+  }
+
+  .avatar-group {
+    display: flex;
+    margin-left: 0.75rem;
+  }
+
+  .avatar-group img {
+    width: 2.5rem;
+    height: 2.5rem;
+    border-radius: 9999px;
+    border: 2px solid #1e3a8a;
+    margin-left: -0.75rem;
+  }
+
+  .bold-link {
+    font-weight: 700;
+    color: white;
+    text-decoration: underline;
+    text-decoration-color: #60a5fa;
+    text-underline-offset: 4px;
+  }
+
+  ul.hero-subtitle {
+  list-style: none; /* Removes default dots */
+  padding: 0;       /* Removes the 40px left-side gap */
+  margin: 0 auto;
+}
+
+ul li::before {
+  content: "✓";     /* Adds the checkmark back */
+  color: #60a5fa;   /* Makes it a nice blue */
+  font-weight: bold;
+  margin-right: 8px; /* Keeps it tight to the text */
+}
+
+</style>

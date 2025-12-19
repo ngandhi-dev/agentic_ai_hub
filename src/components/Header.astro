@@ -1,0 +1,36 @@
+---
+// src/components/Header.astro
+import Navigation from './Navigation.astro';
+import { Image } from 'astro:assets';
+import agenticLogo from '../assets/images/AgenticAIHubLogo.png';
+---
+
+<header class="site-header">
+  <div class="container">
+  <Image src={agenticLogo} alt="Agentic World" width={60} height={60} />
+    <Navigation />
+  </div>
+</header>
+
+<style>
+  .site-header {
+    background: #fff;
+    border-bottom: 1px solid #eee;
+    padding: 1rem 0;
+  }
+  .site-header .container {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 20px;
+  }
+  .logo {
+    font-size: 1.5rem;
+    font-weight: bold;
+    color: #333;
+    text-decoration: none;
+  }
+  /* Add mobile hamburger button & JS for toggling */
+</style>

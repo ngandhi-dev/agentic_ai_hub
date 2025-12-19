@@ -1,0 +1,55 @@
+---
+// src/components/Navigation.astro
+const navLinks = [
+  { href: '/', label: 'Agentic Pulse' },  
+  { href: '/stack', label: 'Agentic Stack' },
+  { href: '/hub', label: 'Agentic Hub' },
+  { href: '/about', label: 'About' },
+];
+---
+
+<nav class="navbar">
+  <ul>
+    {navLinks.map(link => (
+      <li>
+        <a
+          href={link.href}
+          class:list={Astro.pathname === link.href ? 'active' : ''}
+        >
+          {link.label}
+        </a>
+      </li>
+    ))}
+  </ul>
+</nav>
+
+<style>
+  .navbar ul {
+    list-style: none;
+    padding: 0;
+    display: flex;
+    gap: 20px; /* Spacing between links */
+    background: #f4f4f4;
+    padding: 10px;
+    justify-content: center;
+  }
+  .navbar a {
+    text-decoration: none;
+    color: #333;
+    font-weight: 1000; 
+    padding: 8px 12px;
+    border-radius: 4px;
+    transition: background-color 0.3s;
+  }
+  .navbar a:hover, .navbar a.active {
+    background-color: #ddd;
+    color: #000;
+  }
+  /* Mobile styles (example) */
+  @media (max-width: 768px) {
+    .navbar ul {
+      flex-direction: column;
+      align-items: center;
+    }
+  }
+</style>

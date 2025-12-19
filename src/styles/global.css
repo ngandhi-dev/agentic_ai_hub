@@ -1,6 +1,8 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+/* Import Inter from Google Fonts */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
 
 body {
   @apply font-sans text-gray-800 leading-relaxed;
@@ -13,4 +15,37 @@ h1,h2,h3,h4 {
 section {
   @apply scroll-mt-24; /* smooth scroll offset for anchor links */
 }
+
+/* The standard white utility class */
+.text-white {
+  color: #ffffff;
+}
+
+/* For the 90% opacity white I used in the subheading */
+.text-white\/90 {
+  color: rgba(255, 255, 255, 0.9);
+}
+
+/* For the 70% opacity white I used in the footer/meta text */
+.text-white\/70 {
+  color: rgba(255, 255, 255, 0.7);
+}
+
+h1, h2, h3 {
+  font-family: var(--font-sans);
+  font-weight: 800; /* Extra Bold for that punchy look */
+  letter-spacing: -0.025em; /* This is the "secret sauce" for the modern look */
+  line-height: 1.2;
+}
+
+:root {
+  --font-sans: 'Inter', ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+}
+
+body {
+  font-family: var(--font-sans);
+  -webkit-font-smoothing: antialiased; /* Makes the font look "crisp" like dotnetnews */
+  -moz-osx-font-smoothing: grayscale;
+}
+
 
