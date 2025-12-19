@@ -46,9 +46,13 @@ const archives = allIssues.sort((a, b) => b.data.date.getTime() - a.data.date.ge
   <div id="reader-modal" class="modal-backdrop">
     <div class="modal-window">
       <div class="modal-nav">
-         <span class="modal-logo">Agentic Pulse Reader</span>
-         <button id="close-modal">&times;</button>
-      </div>
+   <div class="modal-breadcrumb">
+     <span class="root">Pulse Archive</span> 
+     <span class="sep">/</span> 
+     <span class="current-issue">Issue #1</span>
+   </div>
+   <button id="close-modal" aria-label="Close">&times;</button>
+</div>
       <div id="modal-content-area" class="modal-body">
         <div class="loading-state">
           <div class="spinner"></div>
