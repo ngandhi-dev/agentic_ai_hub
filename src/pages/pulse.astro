@@ -28,37 +28,36 @@ const archives = allIssues.sort((a, b) => b.data.date.getTime() - a.data.date.ge
           <p>No issues found. Please check your <code>src/content/pulse/</code> folder.</p>
         </div>
       ) : (
-        <div class="grid">
-          {archives.map(issue => (
-              <div class="issue-card-trigger" data-slug={issue.slug}>
-              <div class="card-inner">
-              <div class="card-header">
-      <span class="category-pill">{issue.data.tag}</span>
-      <div class="read-stats">
-        <svg class="icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
-        <span>{issue.data.readTime}</span>
-      </div>
-    </div>
-
-    <div class="card-content">
-      <h3>{issue.data.title}</h3>
-      <p>{issue.data.excerpt}</p>
-    </div>
-
-    <div class="card-footer">
-      <time class="post-date">{issue.data.date.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}</time>
-      <div class="live-count" data-path={`/pulse/${issue.slug}`}>
-        <span class="count-number">...</span> views
-      </div>
-      <div class="view-action">
-        <span>Deep Dive</span>
-        <svg class="arrow" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
-      </div>
-    </div>
-  </div>
-</div>
-          ))}
+<div class="grid">
+  {archives.map(issue => (
+    <div class="issue-card-trigger" data-slug={issue.slug}>
+      <div class="card-header">
+        <span class="category-pill">{issue.data.tag}</span>
+        <div class="read-stats">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
+          <span>{issue.data.readTime}</span>
         </div>
+      </div>
+
+      <div class="card-body">
+        <h3>{issue.data.title}</h3>
+        <p class="excerpt">{issue.data.excerpt}</p>
+      </div>
+
+      <div class="card-footer">
+        <div class="footer-left">
+          <time class="post-date">{issue.data.date.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}</time>
+          <div class="live-count" data-path={`/pulse/${issue.slug}`}>
+             <span class="count-number">0</span> views
+          </div>
+        </div>
+        <div class="view-action">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+        </div>
+      </div>
+    </div>
+  ))}
+</div>
       )}
     </div>
   </section>
@@ -72,19 +71,25 @@ const archives = allIssues.sort((a, b) => b.data.date.getTime() - a.data.date.ge
     <span class="dot">•</span>
     <span id="modal-title-small">Issue Insight</span>
   </div>
-  <button id="close-modal" aria-label="Close">
-    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 6L6 18M6 6l12 12"/></svg>
-  </button>
-</div>
+  <div class="nav-actions">
+        <button id="modal-share-btn" class="share-trigger">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8"/><polyline points="16 6 12 2 8 6"/><line x1="12" y1="2" x2="12" y2="15"/></svg>
+          <span>Share</span>
+        </button>
+        
+        <button id="close-modal" aria-label="Close">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 6L6 18M6 6l12 12"/></svg>
+    </button>
+  </div>
+  </div>
       <div id="modal-content-area" class="modal-body">
         <div class="loading-state">
           <div class="spinner"></div>
           <p>Fetching the pulse...</p>
-        </div>
+        </div>        
       </div>
     </div>
-  </div>
-
+    </div>  
   <Footer />
 </Layout>
 
@@ -101,6 +106,23 @@ const archives = allIssues.sort((a, b) => b.data.date.getTime() - a.data.date.ge
   .read-time { font-size: 0.75rem; color: #94a3b8; font-weight: 600; }
   h3 { font-size: 1.4rem; font-weight: 800; margin: 15px 0 10px; color: #0f172a; }
   
+  .nav-actions {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.share-trigger {
+  background: #eff6ff; /* Light blue background */
+  color: #2563eb;      /* Bright blue text */
+  border: none;
+  padding: 6px 14px;
+  border-radius: 99px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-weight: 700;
+  cursor: pointer;
+}
   /* Modal Animation & Layout */
   .modal-backdrop { 
     position: fixed; inset: 0; background: rgba(15, 23, 42, 0.8); 
@@ -259,6 +281,16 @@ const archives = allIssues.sort((a, b) => b.data.date.getTime() - a.data.date.ge
     font-weight: 500;
   }
 
+  .excerpt {
+    font-size: 0.9rem;
+    color: #64748b;
+    line-height: 1.5;
+    display: -webkit-box;
+    -webkit-line-clamp: 3; /* Clips long excerpts at 3 lines */
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+
   .cta-text {
     font-size: 0.9rem;
     font-weight: 700;
@@ -281,17 +313,21 @@ const archives = allIssues.sort((a, b) => b.data.date.getTime() - a.data.date.ge
 
   /* Card Container */
   .issue-card-trigger {
-    position: relative;
-    background: #ffffff;
-    border: 1px solid #e2e8f0;
-    border-radius: 20px;
-    padding: 24px;
-    cursor: pointer;
-    transition: all 0.5s cubic-bezier(0.2, 1, 0.3, 1);
     display: flex;
     flex-direction: column;
-    overflow: hidden;
-    height: 100%; /* Ensures all cards in a row are equal height */
+    justify-content: flex-start;
+    min-height: 280px; /* Uniform height */
+    padding: 24px;
+    background: white;
+    border-radius: 24px;
+    border: 1px solid #e2e8f0;
+    transition: all 0.3s ease;
+  }
+
+  /* Body Content */
+  .card-body {
+    margin-top: 16px;
+    flex-grow: 1; /* This pushes the footer down */
   }
 
   /* Hover State: Elevation & Glow */
@@ -331,11 +367,11 @@ const archives = allIssues.sort((a, b) => b.data.date.getTime() - a.data.date.ge
 
   /* Typography */
   h3 {
-    font-size: 1.25rem; /* Slightly smaller to prevent text overcrowding */
+   font-size: 1.25rem;
     font-weight: 800;
-    color: #0f172a;
     line-height: 1.3;
-    margin-bottom: 10px;
+    color: #0f172a;
+    margin-bottom: 8px;
   }
 
   p {
@@ -352,12 +388,18 @@ const archives = allIssues.sort((a, b) => b.data.date.getTime() - a.data.date.ge
 
   /* Footer & Animation */
   .card-footer {
-    margin-top: auto; /* Pushes footer to bottom */
+    margin-top: 24px;
+    padding-top: 16px;
+    border-top: 1px solid #f1f5f9;
     display: flex;
     justify-content: space-between;
     align-items: center;
-    padding-top: 16px;
-    border-top: 1px solid #f1f5f9;
+  }
+
+  .footer-left {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
   }
 
   .post-date {
@@ -384,16 +426,74 @@ const archives = allIssues.sort((a, b) => b.data.date.getTime() - a.data.date.ge
     opacity: 1;
     transform: translateX(0);
   }
+  .nav-actions { display: flex; align-items: center; gap: 15px; }
+
+.share-trigger {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: #f1f5f9;
+  border: none;
+  padding: 8px 16px;
+  border-radius: 99px;
+  color: #0f172a;
+  font-weight: 700;
+  font-size: 0.85rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.share-trigger:hover { background: #e2e8f0; transform: translateY(-1px); }
+
+.share-dropdown {
+  position: absolute;
+  top: 70px;
+  right: 80px;
+  background: white;
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+  display: none;
+  flex-direction: column;
+  z-index: 1001;
+  overflow: hidden;
+}
+
+.share-dropdown.active { display: flex; }
+
+.share-dropdown button {
+  padding: 12px 20px;
+  border: none;
+  background: none;
+  text-align: left;
+  font-weight: 600;
+  cursor: pointer;
+  font-size: 0.9rem;
+}
+
+.share-dropdown button:hover { background: #f8fafc; color: #3b82f6; }
+
+.live-count {
+    font-size: 0.7rem;
+    font-weight: 700;
+    color: #3b82f6;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+  }
+
 </style>
 
 <script>
   import { supabase } from '../lib/supabase';
-
+  let activeSlug = ''; // Variable to track which issue is open
+  // 1. DECLARE AT THE TOP (Global Scope)
+  let currentSharedSlug = '';
   const modal = document.getElementById('reader-modal');
   const modalContent = document.getElementById('modal-content-area');
   const closeBtn = document.getElementById('close-modal');
   const triggers = document.querySelectorAll('.issue-card-trigger');
-
+  
   // --- 1. TRACK PAGE VISIT ---
   async function trackPageVisit(path) {
     console.log("System Check: Tracking visit for", path);
@@ -407,8 +507,10 @@ const archives = allIssues.sort((a, b) => b.data.date.getTime() - a.data.date.ge
   // --- 2. MODAL & INDIVIDUAL ISSUE TRACKING ---
   triggers.forEach(trigger => {
     trigger.addEventListener('click', async () => {
-      const slug = trigger.getAttribute('data-slug');
-      const path = `/pulse/${slug}`;
+      //const slug = trigger.getAttribute('data-slug');
+      activeSlug = trigger.getAttribute('data-slug'); // Capture slug on click
+      currentSharedSlug = trigger.getAttribute('data-slug');
+      const path = `/pulse/${currentSharedSlug}`;
 
       if (!modal || !modalContent) return;
 
@@ -436,6 +538,22 @@ const archives = allIssues.sort((a, b) => b.data.date.getTime() - a.data.date.ge
     });
   });
 
+  // Logic for the Modal Share Button
+const modalShareBtn = document.getElementById('modal-share-btn');
+modalShareBtn?.addEventListener('click', () => {
+  const shareUrl = `${window.location.origin}/pulse/${currentSharedSlug}`;
+  
+  if (navigator.share) {
+    navigator.share({
+      title: 'Agentic Pulse Insight',
+      url: shareUrl
+    });
+  } else {
+    navigator.clipboard.writeText(shareUrl);
+    alert("Link copied to clipboard!");
+  }
+});
+
   // --- 3. LOAD LIVE VIEW COUNTS ---
   async function loadCounts() {
     const { data, error } = await supabase.from('site_visits').select('page_path, visit_count');
@@ -458,4 +576,37 @@ const archives = allIssues.sort((a, b) => b.data.date.getTime() - a.data.date.ge
 
   // Initial load
   loadCounts();
+
+  // Share Menu Toggle
+const shareBtn = document.getElementById('share-btn');
+const shareMenu = document.getElementById('share-menu');
+
+shareBtn?.addEventListener('click', (e) => {
+  e.stopPropagation();
+  shareMenu?.classList.toggle('active');
+});
+
+// Sharing Logic
+window.shareTo = (platform) => {
+  const url = encodeURIComponent(`${window.location.origin}/pulse/${currentSharedSlug}`);
+  const text = encodeURIComponent("Check out this Agentic AI insight from the Pulse Archive!");
+  
+  const links = {
+    x: `https://x.com/intent/tweet?text=${text}&url=${url}`,
+    linkedin: `https://www.linkedin.com/sharing/share-offsite/?url=${url}`
+  };
+  
+  window.open(links[platform], '_blank');
+  shareMenu?.classList.remove('active');
+};
+
+window.copyLink = () => {
+  const fullUrl = `${window.location.origin}/pulse/${currentSharedSlug}`;
+  navigator.clipboard.writeText(fullUrl);
+  alert("Link copied to clipboard!");
+  shareMenu?.classList.remove('active');
+};
+
+// Close menu if clicking outside
+document.addEventListener('click', () => shareMenu?.classList.remove('active'));
 </script>
