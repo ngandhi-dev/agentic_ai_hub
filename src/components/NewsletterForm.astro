@@ -48,3 +48,13 @@ const { variant = "inline" } = Astro.props;
   max-width: 100%;
 }
 </style>
+<script>
+  async function subscribe(email) {
+    const { data, error } = await supabase
+      .from('subscribers')
+      .insert([{ email }]);
+    
+    if (error) console.error("Error subscribing:", error.message);
+    else alert("Welcome to the Pulse!");
+  }
+</script>

@@ -20,3 +20,31 @@
 		height: 100%;
 	}
 </style>
+
+<script>
+  import { supabase } from '../lib/supabase.js';
+
+  console.log("!!! SYSTEM CHECK: The script tag is bundled and alive !!!");
+  
+  async function trackVisit() {
+    const path = window.location.pathname;
+    console.log("Attempting to track visit for:", path);
+
+    try {
+      const { data, error } = await supabase.rpc('increment_visit', { 
+        page_url: path
+      });
+
+      if (error) {
+        console.error('Supabase RPC Error:', error.message);
+      } else {
+        console.log('Visit tracked successfully for:', path);
+      }
+    } catch (err) {
+      console.error('Script crashed during tracking:', err);
+    }
+  }
+
+  // Run immediately
+  trackVisit();
+</script>

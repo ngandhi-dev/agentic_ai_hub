@@ -47,6 +47,9 @@ const archives = allIssues.sort((a, b) => b.data.date.getTime() - a.data.date.ge
 
     <div class="card-footer">
       <time class="post-date">{issue.data.date.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}</time>
+      <div class="live-count" data-path={`/pulse/${issue.slug}`}>
+        <span class="count-number">...</span> views
+      </div>
       <div class="view-action">
         <span>Deep Dive</span>
         <svg class="arrow" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
@@ -384,59 +387,75 @@ const archives = allIssues.sort((a, b) => b.data.date.getTime() - a.data.date.ge
 </style>
 
 <script>
+  import { supabase } from '../lib/supabase';
+
   const modal = document.getElementById('reader-modal');
   const modalContent = document.getElementById('modal-content-area');
   const closeBtn = document.getElementById('close-modal');
   const triggers = document.querySelectorAll('.issue-card-trigger');
 
+  // --- 1. TRACK PAGE VISIT ---
+  async function trackPageVisit(path) {
+    console.log("System Check: Tracking visit for", path);
+    const { error } = await supabase.rpc('increment_visit', { page_url: path });
+    if (error) console.error("Tracking Error:", error.message);
+  }
+
+  // Track the archive page itself on load
+  trackPageVisit(window.location.pathname);
+
+  // --- 2. MODAL & INDIVIDUAL ISSUE TRACKING ---
   triggers.forEach(trigger => {
     trigger.addEventListener('click', async () => {
       const slug = trigger.getAttribute('data-slug');
+      const path = `/pulse/${slug}`;
+
       if (!modal || !modalContent) return;
 
       modal.classList.add('open');
       document.body.style.overflow = 'hidden';
       modalContent.innerHTML = '<div class="loading-state"><div class="spinner"></div><p>Accessing the Pulse...</p></div>';
 
+      // Track the specific issue visit when opened
+      trackPageVisit(path);
+
       try {
-        const res = await fetch(`/pulse/${slug}`);
+        const res = await fetch(path);
         const html = await res.text();
-        
         const parser = new DOMParser();
         const doc = parser.parseFromString(html, 'text/html');
         
-        // DEBUG: Check what was actually fetched in the console
-        console.log("Full Fetched Document:", doc);
-
-        // Try 3 different ways to find the content
-        const extractedContent = 
-          doc.querySelector('.content') || 
-          doc.querySelector('main') || 
-          doc.querySelector('article') ||
-          doc.body; // Fallback to everything if classes fail
+        const extractedContent = doc.querySelector('.content') || doc.querySelector('main') || doc.querySelector('article') || doc.body;
 
         if (extractedContent) {
-          // Clean up the content: Remove Nav or Footer if they were accidentally grabbed
-          const nav = extractedContent.querySelector('nav');
-          const footer = extractedContent.querySelector('footer');
-          if (nav) nav.remove();
-          if (footer) footer.remove();
-
           modalContent.innerHTML = extractedContent.innerHTML;
-        } else {
-          modalContent.innerHTML = "<p>Content found but could not be parsed.</p>";
         }
       } catch (err) {
         console.error("Fetch Error:", err);
-        modalContent.innerHTML = `<p>Connection error. <a href="/pulse/${slug}">Click here to read directly.</a></p>`;
       }
     });
   });
 
-  const hideModal = () => {
+  // --- 3. LOAD LIVE VIEW COUNTS ---
+  async function loadCounts() {
+    const { data, error } = await supabase.from('site_visits').select('page_path, visit_count');
+    if (error) return console.error("Load Counts Error:", error.message);
+
+    document.querySelectorAll('.live-count').forEach(badge => {
+      const path = badge.getAttribute('data-path');
+      const record = data?.find(r => r.page_path === path);
+      const span = badge.querySelector('.count-number');
+      if (span) span.innerText = record ? record.visit_count : '0';
+    });
+  }
+
+  // Close modal logic
+  closeBtn?.addEventListener('click', () => {
     modal?.classList.remove('open');
     document.body.style.overflow = '';
-  };
+    loadCounts(); // Refresh counts when closing
+  });
 
-  closeBtn?.addEventListener('click', hideModal);
+  // Initial load
+  loadCounts();
 </script>
