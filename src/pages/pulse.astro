@@ -3,9 +3,38 @@ import Layout from '../layouts/Layout.astro';
 import Navigation from '../components/Navigation.astro';
 import Footer from '../components/footer.astro';
 import { getCollection } from 'astro:content';
+import { supabase } from '../lib/supabase'; // Import the client
 
 // Pulling real external data from /src/content/pulse/
-const allIssues = await getCollection('pulse');
+const localIssues = await getCollection('pulse');
+//const archives = localIssues.sort((a, b) => b.data.date.getTime() - a.data.date.getTime());
+
+// 2. Pull external data from Supabase 'archives' table
+const { data: dbIssues, error } = await supabase
+  .from('archives')
+  .select('*')
+  .order('created_at', { ascending: false });
+
+if (error) {
+  console.error("Supabase Fetch Error:", error.message);
+}
+
+// 3. Format Supabase data to match the Astro "issue" structure
+const formattedDbIssues = (dbIssues || []).map(item => ({
+  slug: item.url, // or item.id if you prefer
+  data: {
+    title: item.title,
+    date: new Date(item.created_at),
+    excerpt: item.summary,
+    tag: item.tag || 'News',
+    readTime: '2 min', // Default for news snippets
+    isExternal: true, // Helper flag
+    externalUrl: item.url
+  }
+}));
+
+// 4. Merge both sources and sort by date
+const allIssues = [...localIssues, ...formattedDbIssues];
 const archives = allIssues.sort((a, b) => b.data.date.getTime() - a.data.date.getTime());
 ---
 
@@ -507,10 +536,19 @@ const archives = allIssues.sort((a, b) => b.data.date.getTime() - a.data.date.ge
   // --- 2. MODAL & INDIVIDUAL ISSUE TRACKING ---
   triggers.forEach(trigger => {
     trigger.addEventListener('click', async () => {
-      //const slug = trigger.getAttribute('data-slug');
-      activeSlug = trigger.getAttribute('data-slug'); // Capture slug on click
+      //activeSlug = trigger.getAttribute('data-slug'); // Capture slug on click
       currentSharedSlug = trigger.getAttribute('data-slug');
+      
+      // Check if it's an external URL (starts with http)
+      if (currentSharedSlug.startsWith('http')) {
+        window.open(currentSharedSlug, '_blank');
+        return; // Exit here so we don't open the modal
+      }
+      // Otherwise, proceed with the existing modal logic
       const path = `/pulse/${currentSharedSlug}`;
+      if (!modal || !modalContent) return;
+
+      modal.classList.add('open');
 
       if (!modal || !modalContent) return;
 
