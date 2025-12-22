@@ -1,0 +1,90 @@
+---
+import { Code } from 'astro:components';
+
+const { level, title, subtitle, description, tools, color, index, blueprintCode } = Astro.props;
+const isEven = index % 2 === 0;
+const uniqueId = `blueprint-${index}`;
+---
+
+<section class={`relative flex flex-col md:flex-row items-start gap-8 mb-20 ${isEven ? 'md:flex-row-reverse' : ''}`}>
+  
+  <div class="w-full md:w-[50%] group">
+    <div class="bg-slate-900/50 backdrop-blur-md border border-slate-800 p-8 rounded-3xl hover:border-blue-500/50 transition-all duration-500 shadow-2xl relative overflow-hidden">
+      
+      <div class="flex justify-between items-start mb-6">
+        <div class="flex items-center gap-3">
+          <span class={`w-2 h-2 rounded-full ${color} animate-pulse shadow-[0_0_10px_rgba(var(--color-rgb),0.5)]`}></span>
+          <span class="font-mono text-[10px] tracking-[0.2em] text-slate-500 uppercase">{level}</span>
+        </div>
+        
+        <label class="inline-flex items-center cursor-pointer">
+          <input type="checkbox" id={uniqueId} class="sr-only peer" />
+          <span class="mr-3 text-[10px] font-mono text-slate-500 uppercase peer-checked:text-blue-400">Blueprint Mode</span>
+          <div class="w-9 h-5 bg-slate-800 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:right-[22px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-blue-600"></div>
+        </label>
+      </div>
+
+      <div id={`${uniqueId}-content`}>
+        <h2 class="text-2xl font-bold text-white mb-2">{title}</h2>
+        <h3 class="text-xs font-mono text-blue-400 mb-6 uppercase tracking-wider">{subtitle}</h3>
+        
+        <div class="description-view">
+          <p class="text-slate-400 leading-relaxed mb-8 text-sm md:text-base">
+            {description}
+          </p>
+          
+          <div class="flex flex-wrap gap-3 mt-6">
+  {layer.tools.map((tool) => (
+    <a 
+      href={tool.docsUrl} 
+      class="group relative flex items-center gap-2 px-4 py-2 rounded-xl bg-slate-950 border border-slate-800 text-slate-300 hover:text-white hover:border-blue-500/50 transition-all active:scale-95"
+    >
+      <span class="text-sm font-medium">{tool.name}</span>
+
+      <svg 
+        xmlns="http://www.w3.org/2000/svg" 
+        class="h-3 w-3 opacity-0 group-hover:opacity-100 transition-all" 
+        fill="none" viewBox="0 0 24 24" stroke="currentColor"
+      >
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3" />
+      </svg>
+    </a>
+  ))}
+</div>
+
+        <div class="blueprint-view hidden opacity-0 transition-opacity duration-300">
+           <div class="rounded-xl overflow-hidden border border-slate-800 bg-black/40">
+             <Code code={blueprintCode} lang="typescript" theme="github-dark" />
+           </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="absolute left-4 md:left-1/2 -translate-x-1/2 flex flex-col items-center z-10">
+     <div class={`w-10 h-10 rounded-2xl bg-slate-900 border border-slate-700 flex items-center justify-center shadow-lg`}>
+        <span class="text-xs font-mono font-bold text-slate-400">{index + 1}</span>
+     </div>
+  </div>
+
+  <div class="hidden md:block md:w-[40%]"></div>
+</section>
+
+<script define:vars={{ uniqueId }}>
+  const checkbox = document.getElementById(uniqueId);
+  const container = document.getElementById(`${uniqueId}-content`);
+  const descView = container.querySelector('.description-view');
+  const blueView = container.querySelector('.blueprint-view');
+
+  checkbox.addEventListener('change', () => {
+    if (checkbox.checked) {
+      descView.classList.add('hidden');
+      blueView.classList.remove('hidden');
+      setTimeout(() => blueView.classList.replace('opacity-0', 'opacity-100'), 10);
+    } else {
+      blueView.classList.add('hidden');
+      blueView.classList.replace('opacity-100', 'opacity-0');
+      descView.classList.remove('hidden');
+    }
+  });
+</script>

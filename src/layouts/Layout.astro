@@ -12,13 +12,17 @@
 	</body>
 </html>
 
-<style>
+<style is:global>
 	html,
 	body {
 		margin: 0;
 		width: 100%;
 		height: 100%;
 	}
+  /* This ensures Tailwind's base styles are loaded */
+  @tailwind base;
+  @tailwind components;
+  @tailwind utilities;
 </style>
 
 <script>

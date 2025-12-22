@@ -35,25 +35,19 @@ const { title } = Astro.props;
     const path = window.location.pathname;
     console.log("Attempting to track visit for:", path);
 
-    // Prevent tracking during local development if desired
-    //if (location.hostname === "localhost" || location.hostname === "127.0.0.1") {
-      console.log("Local visit detected - skipping DB update");
-      const { data, error } = await supabase.rpc('increment_visit', { 
-      page_url: path});
-    //  return;
+    // Call Supabase RPC to increment the visit count
+    const { data, error } = await supabase.rpc('increment_visit', { 
+      page_url: path
+    });
+
     if (error) {
       console.error('Supabase RPC Error:', error.message);
       console.error('Error Details:', error);
     } else {
       console.log('Visit tracked successfully for:', path);
     }
-    }
-    // Run on page load
-  trackVisit();
-    
-    if (error) console.error('Analytics Error:', error.message);
   }
-  
-  
-</script>
 
+  // Run the function on page load
+  trackVisit();
+</script>

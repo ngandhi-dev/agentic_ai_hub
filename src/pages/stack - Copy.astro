@@ -1,0 +1,60 @@
+---
+import Layout from '../layouts/Layout.astro';
+import StackLayer from '../components/StackLayer.astro';
+
+const layers = [
+  {
+    level: "Layer 1",
+    title: "The Brain",
+    subtitle: "Frontier & Specialist Models",
+    description: "The core reasoning engine. Choosing between large multi-modal models and small, fast specialized agents.",
+    tools: ["GPT-4o", "Claude 3.5 Sonnet", "Llama 3.1", "DeepSeek Coder"],
+    color: "bg-blue-500",
+  },
+  {
+    level: "Layer 2",
+    title: "The Logic",
+    subtitle: "Orchestration & Frameworks",
+    description: "Defining state, loops, and multi-agent roles. This is where the 'Agent' becomes a 'System'.",
+    tools: ["LangGraph", "CrewAI", "PydanticAI", "AutoGen"],
+    color: "bg-purple-500",
+  },
+  {
+    level: "Layer 3",
+    title: "The Memory",
+    subtitle: "Context & Vector Storage",
+    description: "Giving agents long-term recall and the ability to learn from previous interactions.",
+    tools: ["Pinecone", "Mem0", "Milvus", "Zep"],
+    color: "bg-emerald-500",
+  },
+  {
+    level: "Layer 4",
+    title: "The Hands",
+    subtitle: "Tools & Model Context Protocol",
+    description: "Standardizing how agents interact with the real world—APIs, Databases, and Browsers.",
+    tools: ["MCP Server", "Browser-use", "Firecrawl", "Tavily"],
+    color: "bg-amber-500",
+  }
+];
+---
+
+<Layout title="Agentic Stack | Blueprints for Builders">
+  <main class="max-w-5xl mx-auto px-6 py-20">
+    <div class="mb-16 border-b border-zinc-800 pb-10">
+      <h1 class="text-4xl md:text-6xl font-mono font-bold text-white mb-4">
+        AGENTIC_STACK<span class="animate-pulse text-zinc-500">_</span>
+      </h1>
+      <p class="text-zinc-400 text-lg max-w-2xl">
+        The engineering blueprint for autonomous systems. Structured by architectural layers to help you move from prompt to production.
+      </p>
+    </div>
+
+    <div class="relative space-y-12">
+      <div class="absolute left-4 md:left-1/2 top-0 bottom-0 w-px bg-gradient-to-b from-zinc-800 via-zinc-700 to-transparent -translate-x-1/2 hidden md:block"></div>
+
+      {layers.map((layer, index) => (
+        <StackLayer {...layer} index={index} />
+      ))}
+    </div>
+  </main>
+</Layout>

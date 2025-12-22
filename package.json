@@ -9,6 +9,7 @@
     "astro": "astro"
   },
   "dependencies": {
+    "@astrojs/tailwind": "^6.0.2",
     "@supabase/supabase-js": "^2.89.0",
     "@tailwindcss/vite": "^4.1.18",
     "astro": "^5.16.6"
@@ -17,6 +18,7 @@
     "@tailwindcss/postcss": "^4.1.18",
     "autoprefixer": "^10.4.23",
     "postcss": "^8.5.6",
-    "tailwindcss": "^4.1.18"
+    "postcss-import": "^16.1.1",
+    "tailwindcss": "^3.4.0"
   }
 }

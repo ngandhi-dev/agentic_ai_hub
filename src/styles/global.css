@@ -48,4 +48,17 @@ body {
   -moz-osx-font-smoothing: grayscale;
 }
 
+/* Background Grid for the 'Stack' section only */
+main {
+  background-image: 
+    linear-gradient(to right, #18181b 1px, transparent 1px),
+    linear-gradient(to bottom, #18181b 1px, transparent 1px);
+  background-size: 40px 40px;
+}
+
+/* Subtle Glow on hover */
+.group:hover {
+  filter: drop-shadow(0 0 15px rgba(255, 255, 255, 0.05));
+}
+
 

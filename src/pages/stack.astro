@@ -1,0 +1,293 @@
+---
+import Layout from '../layouts/Layout.astro';
+import Navigation from '../components/Navigation.astro';
+import Footer from '../components/footer.astro';
+import { Code } from 'astro:components';
+const myCode = `const agent = new Agent();`;
+
+const layers = [
+  {
+    id: "brain",
+    level: "Layer 01",
+    title: "The Reasoning Brain",
+    subtitle: "Frontier & Specialist Models",
+    description: "The core intelligence layer. Modern stacks use a 'Router' pattern to send complex reasoning tasks to frontier models while offloading simple formatting or extraction to fast, small models (SLMs).",
+    tools: [
+      { 
+        name: "GPT-4o", 
+        slug: "gpt4o", 
+        description: "Best for cyclic graphs and state management.",
+        docsUrl: "/stack/tools/gpt4o" // Internal link
+      },
+      { 
+        name: "Claude 3.5 Sonnet", 
+        slug: "claude3.5sonnet", 
+        description: "Role-playing autonomous agents.",
+        docsUrl: "/stack/tools/claude3.5sonnet"
+      },
+      { 
+        name: "Llama 3.1 70B", 
+        slug: "llama3.170b", 
+        description: "Best for cyclic graphs and state management.",
+        docsUrl: "/stack/tools/llama3.170b" // Internal link
+      },
+      { 
+        name: "Mistral Large", 
+        slug: "mistrallarge", 
+        description: "Role-playing autonomous agents.",
+        docsUrl: "/stack/tools/mistrallarge"
+      }
+      ],
+    color: "from-blue-600 to-cyan-500",
+    blueprint: `// Pattern: LLM Routing Logic
+const agentBrain = async (input: string) => {
+  const complexity = await analyzeComplexity(input);
+  
+  // Route to high-reasoning vs high-speed
+  const model = complexity > 0.7 
+    ? "claude-3-5-sonnet" 
+    : "gpt-4o-mini";
+
+  return await llm.generate({ model, prompt: input });
+};`
+  },
+  {
+    id: "logic",
+    level: "Layer 02",
+    title: "The Orchestration",
+    subtitle: "State Management & Cognitive Loops",
+    description: "The nervous system that manages multi-step workflows. It handles the 'ReAct' loop (Reason + Act), enabling the agent to observe its own mistakes and correct them before final output.",
+    tools: [{ 
+        name: "LangGraph", 
+        slug: "langraph", 
+        description: "Best for cyclic graphs and state management.",
+        docsUrl: "/stack/tools/langraph" // Internal link
+      },
+      { 
+        name: "CrewAI", 
+        slug: "crewai", 
+        description: "Role-playing autonomous agents.",
+        docsUrl: "/stack/tools/crewai"
+      },
+      { 
+        name: "PydanticAI", 
+        slug: "pydanticai", 
+        description: "Best for cyclic graphs and state management.",
+        docsUrl: "/stack/tools/pydanticai" // Internal link
+      },
+      { 
+        name: "AutoGen", 
+        slug: "autogen", 
+        description: "Role-playing autonomous agents.",
+        docsUrl: "/stack/tools/autogen"
+      }
+      ],
+    color: "from-purple-600 to-pink-500",
+    blueprint: `// Pattern: ReAct Loop (LangGraph style)
+const workflow = new StateGraph(AgentState)
+  .addNode("think", reasoner)
+  .addNode("act", toolExecutor)
+  .addEdge("think", (state) => {
+    return state.hasToolCall ? "act" : "__end__";
+  })
+  .addEdge("act", "think");`
+  },
+  {
+    id: "memory",
+    level: "Layer 03",
+    title: "The Memory Vault",
+    subtitle: "Context & Long-term Recall",
+    description: "Agents need 'Short-term' memory (conversation history) and 'Long-term' memory (learning user preferences over months). This layer manages Vector DBs and Semantic Cache.",
+    tools: ["Pinecone", "Mem0", "Milvus", "Zep"],
+    color: "from-emerald-600 to-teal-500",
+    blueprint: `// Pattern: Semantic Memory Retrieval
+const getContext = async (userId: string, query: string) => {
+  // 1. Fetch vector context from Pinecone
+  const vectorDocs = await vectorStore.search(query);
+  
+  // 2. Fetch user preferences from Mem0
+  const userPrefs = await memory.get(userId);
+
+  return \`Prefs: \${userPrefs} \\n Context: \${vectorDocs}\`;
+};`
+  },
+  {
+    id: "hands",
+    level: "Layer 04",
+    title: "The Action Layer",
+    subtitle: "Tools, Browsers & MCP",
+    description: "The 'Hands' of the agent. This layer uses tool-calling to interact with external APIs, execute Python code in sandboxes, or navigate websites to find information.",
+    tools: ["MCP Server", "Browser-use", "Firecrawl", "Tavily"],
+    color: "from-amber-600 to-orange-500",
+    blueprint: `// Pattern: Tool Definition (JSON Schema)
+const tools = [{
+  type: "function",
+  function: {
+    name: "get_stock_price",
+    description: "Fetches live price for a symbol",
+    parameters: {
+      type: "object",
+      properties: {
+        symbol: { type: "string" }
+      }
+    }
+  }
+}];`
+  },
+  {
+  id: "evals",
+  level: "Layer 05",
+  title: "The Guardrails & Evals",
+  subtitle: "Observability & Trust Systems",
+  description: "The safety net. In production, agents must be monitored for 'hallucination rates,' tool-calling accuracy, and cost spikes. This layer ensures that autonomous actions remain within corporate policy and safety boundaries.",
+  tools: ["LangSmith", "Arize Phoenix", "Guardrails AI", "Weights & Biases"],
+  color: "from-red-600 to-orange-500",
+  blueprint: `// Pattern: LLM-as-a-Judge Evaluation
+const evalAgent = async (prediction, reference) => {
+  const feedback = await evaluator.check({
+    input: prediction,
+    criteria: "conciseness, accuracy, tone",
+    reference: reference
+  });
+
+  if (feedback.score < 0.8) {
+    throw new Error("Quality threshold not met");
+  }
+  return feedback;
+};`
+}
+];
+---
+
+<Layout title="Agentic Stack | Architecture">
+  <Navigation />
+  
+  <main class="stack-page">
+    <div class="content-wrapper">
+      <header class="hero">
+        <span class="version-tag">SYSTEM_CORE: v2.0</span>
+        <h1>The Agentic Stack</h1>
+        <p>Architectural blueprints for autonomous systems.</p>
+      </header>
+
+      <div class="stack-layout">
+        <aside class="sidebar">
+          {layers.map(l => <a href={`#${l.id}`}>{l.level}</a>)}
+        </aside>
+
+        <div class="layers-container">
+          {layers.map((layer) => (
+            <section id={layer.id} class="layer-card">
+              <div class="card-header">
+                <div class="title-area">
+                  <div class={`indicator bg-gradient-to-r ${layer.color}`}></div>
+                  <span class="level">{layer.level}</span>
+                  <h2>{layer.title}</h2>
+                  <p class="subtitle">{layer.subtitle}</p>
+                </div>
+
+                <button class="toggle-btn" data-target={`code-${layer.id}`}>
+                  <span>BLUEPRINT</span>
+                  <div class="switch"><div class="dot"></div></div>
+                </button>
+              </div>
+
+              <div id={`desc-${layer.id}`} class="view-content active">
+                <p>{layer.description}</p>
+                <div class="tools">
+                            {layer.tools.map(t => (
+    <span class="tool">
+      {/* This check handles both the new objects and the old strings */}
+      {typeof t === 'string' ? t : t.name}
+      
+      {/* Optional: Add the link if it's an object */}
+      {typeof t !== 'string' && (
+        <a href={t.docsUrl} class="ml-1 text-blue-400">↗</a>
+      )}
+    </span>
+  ))}
+                </div>
+              </div>
+
+              <div id={`code-${layer.id}`} class="view-content hidden code-box">
+                <Code code={layer.blueprint} lang="ts" theme="github-dark" />
+              </div>
+            </section>
+          ))}
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <Footer />
+</Layout>
+
+<style>
+  /* Critical Styles in case Tailwind fails */
+  .stack-page {
+    background: #020617;
+    color: white;
+    min-height: 100vh;
+    padding-top: 100px;
+    font-family: sans-serif;
+  }
+  .content-wrapper { max-width: 1100px; margin: 0 auto; padding: 0 20px; }
+  .hero { margin-bottom: 60px; }
+  .version-tag { font-family: monospace; color: #3b82f6; font-size: 12px; border: 1px solid #1e3a8a; padding: 4px 8px; border-radius: 4px; }
+  h1 { font-size: 48px; margin: 20px 0; font-weight: 800; }
+  
+  .stack-layout { display: flex; gap: 40px; }
+  .sidebar { width: 150px; position: sticky; top: 120px; height: fit-content; border-left: 1px solid #1e293b; }
+  .sidebar a { display: block; padding: 8px 20px; font-family: monospace; color: #64748b; text-decoration: none; font-size: 14px; }
+  
+  .layer-card { 
+    background: #0f172a; 
+    border: 1px solid #1e293b; 
+    border-radius: 24px; 
+    padding: 40px; 
+    margin-bottom: 40px;
+  }
+  .card-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 30px; }
+  .indicator { width: 12px; height: 12px; border-radius: 50%; margin-bottom: 10px; }
+  .level { font-family: monospace; color: #475569; font-size: 12px; text-transform: uppercase; }
+  h2 { font-size: 28px; margin: 5px 0; }
+  .subtitle { color: #3b82f6; font-family: monospace; font-size: 14px; }
+
+  .toggle-btn { background: none; border: none; cursor: pointer; display: flex; align-items: center; gap: 10px; color: #475569; font-size: 10px; font-weight: bold; }
+  .switch { width: 40px; height: 20px; background: #1e293b; border-radius: 20px; position: relative; }
+  .dot { width: 14px; height: 14px; background: white; border-radius: 50%; position: absolute; top: 3px; left: 3px; transition: 0.3s; }
+  .toggle-btn.active .dot { transform: translateX(20px); }
+  .toggle-btn.active .switch { background: #3b82f6; }
+
+  .view-content { transition: 0.3s opacity; }
+  .view-content.hidden { display: none; }
+  .tool { background: #020617; border: 1px solid #1e293b; padding: 6px 15px; border-radius: 10px; font-size: 13px; margin-right: 10px; color: #94a3b8; }
+  
+  .code-box { border-radius: 12px; overflow: hidden; border: 1px solid #334155; }
+</style>
+
+<script>
+  document.querySelectorAll('.toggle-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const targetId = btn.getAttribute('data-target');
+      const layerId = targetId.split('-')[1];
+      const codeBlock = document.getElementById(targetId);
+      const descBlock = document.getElementById(`desc-${layerId}`);
+      // Simple search filter for the stack page
+      const searchInput = document.getElementById('tool-search');
+  
+      searchInput.addEventListener('input', (e) => {
+      const term = e.target.value.toLowerCase();
+      const toolPills = document.querySelectorAll('.group'); // targeting our tool links
+
+      toolPills.forEach(pill => {
+        const name = pill.textContent.toLowerCase();
+          pill.style.display = name.includes(term) ? 'flex' : 'none';
+        });
+      });
+      btn.classList.toggle('active');
+      codeBlock.classList.toggle('hidden');
+      descBlock.classList.toggle('hidden');
+    });
+  });
+</script>
