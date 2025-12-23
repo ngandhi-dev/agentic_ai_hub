@@ -25,6 +25,7 @@ jobs:
         # No need to specify the dist folder here;
         # the official action handles the internal logic.
 
+        # install dependencies and build project
       - name: Install dependencies
         run: npm install
 
