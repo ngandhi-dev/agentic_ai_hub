@@ -73,6 +73,13 @@
                   <p>No issues found. Please check your <code>src/content/pulse/</code> folder.</p>
                 </div>
               ) : (
+            <div class="search-container container">
+              <div class="search-wrapper">
+                <svg class="search-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg>
+                  <input type="text" id="pulse-search" placeholder="Search breakthroughs by topic, source, or keyword..." autocomplete="off"/>
+                  <div id="search-results-count" class="results-badge"></div>
+              </div>
+            </div>
 
         <div class="pulse-container">
           <aside class="pulse-sidebar">
@@ -988,6 +995,56 @@
         background: #2563eb;
         transform: translateY(-5px);
       }
+
+      .search-container {
+          margin: 2rem auto;
+          max-width: 800px;
+        }
+
+        .search-wrapper {
+          position: relative;
+          display: flex;
+          align-items: center;
+        }
+
+        .search-icon {
+          position: absolute;
+          left: 20px;
+          color: #94a3b8;
+        }
+
+        #pulse-search {
+          width: 100%;
+          padding: 16px 20px 16px 55px;
+          background: #ffffff;
+          border: 2px solid #e2e8f0;
+          border-radius: 100px;
+          font-size: 1.1rem;
+          font-family: inherit;
+          transition: all 0.3s ease;
+          box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+        }
+
+        #pulse-search:focus {
+          outline: none;
+          border-color: #2563eb;
+          box-shadow: 0 10px 15px -3px rgba(37, 99, 235, 0.1);
+        }
+
+        .results-badge {
+          position: absolute;
+          right: 20px;
+          font-size: 0.8rem;
+          font-weight: 700;
+          color: #64748b;
+          background: #f1f5f9;
+          padding: 4px 12px;
+          border-radius: 20px;
+          display: none;
+        }
+
+        /* Classes for hiding sections during search */
+        .hidden { display: none !important; }
         </style>
 
         <script>
@@ -1250,4 +1307,54 @@
           });
         });
 
+        // --- 5. SEARCH LOGIC ---
+        const searchInput = document.getElementById('pulse-search');
+        const resultsBadge = document.getElementById('search-results-count');
+        const cards = document.querySelectorAll('.issue-card-trigger');
+        const monthBlocks = document.querySelectorAll('.month-block');
+        const weekBlocks = document.querySelectorAll('.week-block');
+
+        searchInput?.addEventListener('input', (e) => {
+          const query = e.target.value.toLowerCase().trim();
+          let visibleCount = 0;
+
+          // 1. Filter Individual Cards
+          cards.forEach(card => {
+            const title = card.getAttribute('data-title')?.toLowerCase() || "";
+            const summary = card.getAttribute('data-summary')?.toLowerCase() || "";
+            const tag = card.getAttribute('data-tag')?.toLowerCase() || "";
+            const url = card.getAttribute('data-url')?.toLowerCase() || "";
+
+            const isMatch = title.includes(query) || 
+                            summary.includes(query) || 
+                            tag.includes(query) || 
+                            url.includes(query);
+
+            if (isMatch) {
+              card.classList.remove('hidden');
+              visibleCount++;
+            } else {
+              card.classList.add('hidden');
+            }
+          });
+
+          // 2. Hide Week/Month headers if they have no visible cards
+          weekBlocks.forEach(week => {
+            const visibleCardsInWeek = week.querySelectorAll('.issue-card-trigger:not(.hidden)').length;
+            week.classList.toggle('hidden', visibleCardsInWeek === 0);
+          });
+
+          monthBlocks.forEach(month => {
+            const visibleWeeksInMonth = month.querySelectorAll('.week-block:not(.hidden)').length;
+            month.classList.toggle('hidden', visibleWeeksInMonth === 0);
+          });
+
+          // 3. Update Results Badge
+          if (query.length > 0) {
+            resultsBadge.style.display = 'block';
+            resultsBadge.innerText = `${visibleCount} results`;
+          } else {
+            resultsBadge.style.display = 'none';
+          }
+        });
         </script>
