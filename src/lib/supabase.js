@@ -5,9 +5,10 @@ const supabaseAnonKey = import.meta.env.PUBLIC_SUPABASE_ANON_KEY || 'sb_publisha
 
 // Add this temporary log to see if variables are loading
 console.log("Supabase URL loaded:", !!supabaseUrl); 
+console.log("Supabase Key loaded:", !!supabaseAnonKey); 
 
 // Log to help debugging in GitHub Actions (optional)
-if (!supabaseUrl || !supabaseKey) {
+if (!supabaseUrl || !supabaseAnonKey) {
   console.warn("Supabase credentials missing!");
 }
 if (import.meta.env.PUBLIC_SUPABASE_URL === undefined) {
