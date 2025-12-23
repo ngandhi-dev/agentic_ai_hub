@@ -22,7 +22,7 @@ jobs:
       - name: Install, build, and upload
         uses: withastro/action@v3
         env:
-          # These MUST match the names in your GitHub Secrets
+          # These MUST match the names in your GitHub Secrets 
           PUBLIC_SUPABASE_URL: ${{ secrets.PUBLIC_SUPABASE_URL }}
           PUBLIC_SUPABASE_ANON_KEY: ${{ secrets.PUBLIC_SUPABASE_ANON_KEY }}
 
