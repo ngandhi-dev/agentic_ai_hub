@@ -1,0 +1,650 @@
+---
+import Layout from '../layouts/Layout.astro';
+import Navigation from '../components/Navigation.astro';
+import Footer from '../components/footer.astro';
+import { getCollection } from 'astro:content';
+import { supabase } from '../lib/supabase'; // Import the client
+
+// Pulling real external data from /src/content/pulse/
+const localIssues = await getCollection('pulse');
+//const archives = localIssues.sort((a, b) => b.data.date.getTime() - a.data.date.getTime());
+
+// 2. Pull external data from Supabase 'archives' table
+const { data: dbIssues, error } = await supabase
+  .from('archives')
+  .select('*')
+  .order('created_at', { ascending: false });
+
+if (error) {
+  console.error("Supabase Fetch Error:", error.message);
+}
+
+// 3. Format Supabase data to match the Astro "issue" structure
+const formattedDbIssues = (dbIssues || []).map(item => ({
+  slug: item.url, // or item.id if you prefer
+  data: {
+    title: item.title,
+    date: new Date(item.created_at),
+    excerpt: item.summary,
+    tag: item.tag || 'News',
+    readTime: '2 min', // Default for news snippets
+    isExternal: true, // Helper flag
+    externalUrl: item.url
+  }
+}));
+
+// 4. Merge both sources and sort by date
+const allIssues = [...localIssues, ...formattedDbIssues];
+const archives = allIssues.sort((a, b) => b.data.date.getTime() - a.data.date.getTime());
+---
+
+<Layout title="Archive | Agentic Pulse">
+  <Navigation />
+  
+  <main class="archive-main">
+    <section class="archive-hero">
+      <div class="container">
+        <span class="badge">LATEST UPDATES</span>
+        <h1>Agentic Pulse Archive</h1>
+        <p>Your technical timeline for autonomous AI Agent breakthroughs.</p>
+      </div>
+    </section>
+
+    <section class="archive-list">
+    <div class="container">
+      {archives.length === 0 ? (
+        <div class="empty-state">
+          <p>No issues found. Please check your <code>src/content/pulse/</code> folder.</p>
+        </div>
+      ) : (
+<div class="grid">
+  {archives.map(issue => (
+    <div class="issue-card-trigger" data-slug={issue.slug}>
+      <div class="card-header">
+        <span class="category-pill">{issue.data.tag}</span>
+        <div class="read-stats">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
+          <span>{issue.data.readTime}</span>
+        </div>
+      </div>
+
+      <div class="card-body">
+        <h3>{issue.data.title}</h3>
+        <p class="excerpt">{issue.data.excerpt}</p>
+      </div>
+
+      <div class="card-footer">
+        <div class="footer-left">
+          <time class="post-date">{issue.data.date.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}</time>
+          <div class="live-count" data-path={`/pulse/${issue.slug}`}>
+             <span class="count-number">0</span> views
+          </div>
+        </div>
+        <div class="view-action">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+        </div>
+      </div>
+    </div>
+  ))}
+</div>
+      )}
+    </div>
+  </section>
+  </main>
+
+  <div id="reader-modal" class="modal-backdrop">
+    <div class="modal-window">
+      <div class="modal-nav">
+  <div class="reader-meta">
+    <span class="label">PULSE REPLAY</span>
+    <span class="dot">•</span>
+    <span id="modal-title-small">Issue Insight</span>
+  </div>
+  <div class="nav-actions">
+        <button id="modal-share-btn" class="share-trigger">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8"/><polyline points="16 6 12 2 8 6"/><line x1="12" y1="2" x2="12" y2="15"/></svg>
+          <span>Share</span>
+        </button>
+        
+        <button id="close-modal" aria-label="Close">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 6L6 18M6 6l12 12"/></svg>
+    </button>
+  </div>
+  </div>
+      <div id="modal-content-area" class="modal-body">
+        <div class="loading-state">
+          <div class="spinner"></div>
+          <p>Fetching the pulse...</p>
+        </div>        
+      </div>
+    </div>
+    </div>  
+  <Footer />
+</Layout>
+
+<style>
+  /* Basic Styles */
+  .archive-main { padding-top: 80px; min-height: 100vh; font-family: 'Inter', sans-serif; }
+  .container { max-width: 1100px; margin: 0 auto; padding: 0 20px; }
+  
+  .archive-hero { background: #0f172a; padding: 80px 0; color: white; text-align: center; }
+  .archive-hero h1 { font-size: 3rem; font-weight: 900; letter-spacing: -0.04em; }
+  
+  
+  .tag { background: #eff6ff; color: #2563eb; font-size: 0.7rem; font-weight: 700; padding: 4px 10px; border-radius: 99px; text-transform: uppercase; }
+  .read-time { font-size: 0.75rem; color: #94a3b8; font-weight: 600; }
+  h3 { font-size: 1.4rem; font-weight: 800; margin: 15px 0 10px; color: #0f172a; }
+  
+  .nav-actions {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.share-trigger {
+  background: #eff6ff; /* Light blue background */
+  color: #2563eb;      /* Bright blue text */
+  border: none;
+  padding: 6px 14px;
+  border-radius: 99px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-weight: 700;
+  cursor: pointer;
+}
+  /* Modal Animation & Layout */
+  .modal-backdrop { 
+    position: fixed; inset: 0; background: rgba(15, 23, 42, 0.8); 
+    backdrop-filter: blur(12px); z-index: 1000; display: none; 
+    align-items: center; justify-content: center; padding: 20px;
+  }
+  .modal-backdrop.open { display: flex; }
+  
+  .modal-window { 
+    background: #fff; width: 100%; max-width: 850px; height: 85vh; 
+    border-radius: 32px; overflow: hidden; display: flex; flex-direction: column;
+    animation: slideUp 0.3s ease-out;
+  }
+  .modal-window {
+    background: #ffffff;
+    max-width: 800px;
+    width: 95%;
+    height: 85vh;
+    border-radius: 32px;
+    box-shadow: 0 50px 100px -20px rgba(0,0,0,0.25);
+    display: flex;
+    flex-direction: column;
+    animation: modalSlideUp 0.4s ease-out;
+  }
+
+  @keyframes modalSlideUp {
+    from { transform: translateY(40px); opacity: 0; }
+    to { transform: translateY(0); opacity: 1; }
+  }
+
+  .modal-body {
+    padding: 60px 80px;
+    overflow-y: auto;
+    font-size: 1.1rem;
+    line-height: 1.8;
+    color: #334155;
+  }
+
+  /* Styling Markdown content inside the modal */
+  .modal-body :global(h2) {
+    font-size: 2rem;
+    font-weight: 900;
+    color: #0f172a;
+    margin: 40px 0 20px;
+  }
+
+  .modal-body :global(blockquote) {
+    border-left: 4px solid #3b82f6;
+    background: #f8fafc;
+    padding: 24px 32px;
+    margin: 32px 0;
+    border-radius: 0 16px 16px 0;
+    font-style: italic;
+    color: #1e40af;
+  }
+
+  .modal-body :global(ul) {
+    list-style: none;
+    padding: 0;
+  }
+
+  .modal-body :global(li) {
+    position: relative;
+    padding-left: 28px;
+    margin-bottom: 12px;
+  }
+
+  .modal-body :global(li::before) {
+    content: "→";
+    position: absolute;
+    left: 0;
+    color: #3b82f6;
+    font-weight: 900;
+  }
+
+
+  @keyframes slideUp {
+    from { transform: translateY(20px); opacity: 0; }
+    to { transform: translateY(0); opacity: 1; }
+  }
+
+  .modal-nav { padding: 20px 40px; border-bottom: 1px solid #f1f5f9; display: flex; justify-content: space-between; align-items: center; }
+  #close-modal { font-size: 2.5rem; border: none; background: none; cursor: pointer; color: #64748b; }
+
+  .modal-body { padding: 60px 80px; overflow-y: auto; line-height: 1.8; color: #334155; }
+
+  /* Injected Content Styles */
+  .modal-body :global(h1) { font-size: 3rem; font-weight: 900; color: #0f172a; margin-bottom: 24px; }
+  .modal-body :global(h2) { font-size: 1.8rem; margin-top: 40px; color: #0f172a; font-weight: 800; }
+  .modal-body :global(blockquote) { border-left: 4px solid #2563eb; padding-left: 24px; font-style: italic; margin: 40px 0; color: #1e40af; background: #f8fbff; padding: 20px 30px; border-radius: 0 12px 12px 0; }
+
+  /* Loader */
+  .spinner { width: 40px; height: 40px; border: 4px solid #f3f3f3; border-top: 4px solid #2563eb; border-radius: 50%; animation: spin 1s linear infinite; margin: 0 auto 20px; }
+  @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+  .loading-state { text-align: center; margin-top: 100px; color: #64748b; font-weight: 600; }
+
+  .card-meta {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+  }
+
+  .tag-badge {
+    background: #eff6ff;
+    color: #2563eb;
+    font-size: 0.75rem;
+    font-weight: 700;
+    padding: 6px 14px;
+    border-radius: 100px;
+    text-transform: uppercase;
+    letter-spacing: 0.02em;
+  }
+
+  .reading-time {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 0.8rem;
+    color: #94a3b8;
+    font-weight: 500;
+  }
+
+  h3 {
+    font-size: 1.5rem;
+    font-weight: 800;
+    color: #0f172a;
+    line-height: 1.25;
+    margin-bottom: 12px;
+    letter-spacing: -0.02em;
+  }
+
+  p {
+    color: #64748b;
+    font-size: 1rem;
+    line-height: 1.6;
+    margin-bottom: 24px;
+    display: -webkit-box;
+    -webkit-line-clamp: 3; /* Clips text after 3 lines */
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+
+  .card-footer {
+    margin-top: auto;
+    padding-top: 20px;
+    border-top: 1px solid #f1f5f9;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+
+  .issue-date {
+    font-size: 0.85rem;
+    color: #94a3b8;
+    font-weight: 500;
+  }
+
+  .excerpt {
+    font-size: 0.9rem;
+    color: #64748b;
+    line-height: 1.5;
+    display: -webkit-box;
+    -webkit-line-clamp: 3; /* Clips long excerpts at 3 lines */
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+
+  .cta-text {
+    font-size: 0.9rem;
+    font-weight: 700;
+    color: #2563eb;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    opacity: 0;
+    transform: translateX(-10px);
+    transition: all 0.3s ease;
+  }
+  /* Grid Layout */
+  .grid {
+   display: grid;
+    /* Changed minmax from 350px to 300px to allow 3-column fit */
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 1.5rem; /* Slightly tighter gap for 3-column balance */
+    padding: 2rem 0;
+  }
+
+  /* Card Container */
+  .issue-card-trigger {
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+    min-height: 280px; /* Uniform height */
+    padding: 24px;
+    background: white;
+    border-radius: 24px;
+    border: 1px solid #e2e8f0;
+    transition: all 0.3s ease;
+  }
+
+  /* Body Content */
+  .card-body {
+    margin-top: 16px;
+    flex-grow: 1; /* This pushes the footer down */
+  }
+
+  /* Hover State: Elevation & Glow */
+  .issue-card-trigger:hover {
+    transform: translateY(-8px);
+    border-color: #3b82f6;
+    box-shadow: 0 20px 25px -10px rgba(0, 0, 0, 0.08);
+  }
+
+  /* Meta Styling */
+  .card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 16px;
+  }
+
+  .category-pill {
+    background: #eff6ff;
+    color: #2563eb;
+    font-size: 0.65rem; /* Scaled down for 3-column fit */
+    font-weight: 800;
+    padding: 4px 10px;
+    border-radius: 99px;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+  }
+
+  .read-stats {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    font-size: 0.7rem;
+    color: #94a3b8;
+    font-weight: 600;
+  }
+
+  /* Typography */
+  h3 {
+   font-size: 1.25rem;
+    font-weight: 800;
+    line-height: 1.3;
+    color: #0f172a;
+    margin-bottom: 8px;
+  }
+
+  p {
+    color: #64748b;
+    font-size: 0.9rem;
+    line-height: 1.5;
+    margin-bottom: 20px;
+    /* Strict 3-line limit to keep grid tidy */
+    display: -webkit-box;
+    -webkit-line-clamp: 3;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+
+  /* Footer & Animation */
+  .card-footer {
+    margin-top: 24px;
+    padding-top: 16px;
+    border-top: 1px solid #f1f5f9;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+
+  .footer-left {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+  }
+
+  .post-date {
+    font-size: 0.75rem;
+    color: #94a3b8;
+    font-weight: 500;
+  }
+
+  .view-action {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    color: #2563eb;
+    font-weight: 700;
+    font-size: 0.8rem;
+    transition: transform 0.3s ease;
+  }
+
+  .issue-card-trigger:hover .view-action {
+    transform: translateX(4px);
+  }
+
+  .issue-card-trigger:hover .cta-text {
+    opacity: 1;
+    transform: translateX(0);
+  }
+  .nav-actions { display: flex; align-items: center; gap: 15px; }
+
+.share-trigger {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: #f1f5f9;
+  border: none;
+  padding: 8px 16px;
+  border-radius: 99px;
+  color: #0f172a;
+  font-weight: 700;
+  font-size: 0.85rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.share-trigger:hover { background: #e2e8f0; transform: translateY(-1px); }
+
+.share-dropdown {
+  position: absolute;
+  top: 70px;
+  right: 80px;
+  background: white;
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+  display: none;
+  flex-direction: column;
+  z-index: 1001;
+  overflow: hidden;
+}
+
+.share-dropdown.active { display: flex; }
+
+.share-dropdown button {
+  padding: 12px 20px;
+  border: none;
+  background: none;
+  text-align: left;
+  font-weight: 600;
+  cursor: pointer;
+  font-size: 0.9rem;
+}
+
+.share-dropdown button:hover { background: #f8fafc; color: #3b82f6; }
+
+.live-count {
+    font-size: 0.7rem;
+    font-weight: 700;
+    color: #3b82f6;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+  }
+
+</style>
+
+<script>
+  import { supabase } from '../lib/supabase';
+  let activeSlug = ''; // Variable to track which issue is open
+  // 1. DECLARE AT THE TOP (Global Scope)
+  let currentSharedSlug = '';
+  const modal = document.getElementById('reader-modal');
+  const modalContent = document.getElementById('modal-content-area');
+  const closeBtn = document.getElementById('close-modal');
+  const triggers = document.querySelectorAll('.issue-card-trigger');
+  
+  // --- 1. TRACK PAGE VISIT ---
+  async function trackPageVisit(path) {
+    console.log("System Check: Tracking visit for", path);
+    const { error } = await supabase.rpc('increment_visit', { page_url: path });
+    if (error) console.error("Tracking Error:", error.message);
+  }
+
+  // Track the archive page itself on load
+  trackPageVisit(window.location.pathname);
+
+  // --- 2. MODAL & INDIVIDUAL ISSUE TRACKING ---
+  triggers.forEach(trigger => {
+    trigger.addEventListener('click', async () => {
+      //activeSlug = trigger.getAttribute('data-slug'); // Capture slug on click
+      currentSharedSlug = trigger.getAttribute('data-slug');
+      
+      // Check if it's an external URL (starts with http)
+      if (currentSharedSlug.startsWith('http')) {
+        window.open(currentSharedSlug, '_blank');
+        return; // Exit here so we don't open the modal
+      }
+      // Otherwise, proceed with the existing modal logic
+      const path = `/pulse/${currentSharedSlug}`;
+      if (!modal || !modalContent) return;
+
+      modal.classList.add('open');
+
+      if (!modal || !modalContent) return;
+
+      modal.classList.add('open');
+      document.body.style.overflow = 'hidden';
+      modalContent.innerHTML = '<div class="loading-state"><div class="spinner"></div><p>Accessing the Pulse...</p></div>';
+
+      // Track the specific issue visit when opened
+      trackPageVisit(path);
+
+      try {
+        const res = await fetch(path);
+        const html = await res.text();
+        const parser = new DOMParser();
+        const doc = parser.parseFromString(html, 'text/html');
+        
+        const extractedContent = doc.querySelector('.content') || doc.querySelector('main') || doc.querySelector('article') || doc.body;
+
+        if (extractedContent) {
+          modalContent.innerHTML = extractedContent.innerHTML;
+        }
+      } catch (err) {
+        console.error("Fetch Error:", err);
+      }
+    });
+  });
+
+  // Logic for the Modal Share Button
+const modalShareBtn = document.getElementById('modal-share-btn');
+modalShareBtn?.addEventListener('click', () => {
+  const shareUrl = `${window.location.origin}/pulse/${currentSharedSlug}`;
+  
+  if (navigator.share) {
+    navigator.share({
+      title: 'Agentic Pulse Insight',
+      url: shareUrl
+    });
+  } else {
+    navigator.clipboard.writeText(shareUrl);
+    alert("Link copied to clipboard!");
+  }
+});
+
+  // --- 3. LOAD LIVE VIEW COUNTS ---
+  async function loadCounts() {
+    const { data, error } = await supabase.from('site_visits').select('page_path, visit_count');
+    if (error) return console.error("Load Counts Error:", error.message);
+
+    document.querySelectorAll('.live-count').forEach(badge => {
+      const path = badge.getAttribute('data-path');
+      const record = data?.find(r => r.page_path === path);
+      const span = badge.querySelector('.count-number');
+      if (span) span.innerText = record ? record.visit_count : '0';
+    });
+  }
+
+  // Close modal logic
+  closeBtn?.addEventListener('click', () => {
+    modal?.classList.remove('open');
+    document.body.style.overflow = '';
+    loadCounts(); // Refresh counts when closing
+  });
+
+  // Initial load
+  loadCounts();
+
+  // Share Menu Toggle
+const shareBtn = document.getElementById('share-btn');
+const shareMenu = document.getElementById('share-menu');
+
+shareBtn?.addEventListener('click', (e) => {
+  e.stopPropagation();
+  shareMenu?.classList.toggle('active');
+});
+
+// Sharing Logic
+window.shareTo = (platform) => {
+  const url = encodeURIComponent(`${window.location.origin}/pulse/${currentSharedSlug}`);
+  const text = encodeURIComponent("Check out this Agentic AI insight from the Pulse Archive!");
+  
+  const links = {
+    x: `https://x.com/intent/tweet?text=${text}&url=${url}`,
+    linkedin: `https://www.linkedin.com/sharing/share-offsite/?url=${url}`
+  };
+  
+  window.open(links[platform], '_blank');
+  shareMenu?.classList.remove('active');
+};
+
+window.copyLink = () => {
+  const fullUrl = `${window.location.origin}/pulse/${currentSharedSlug}`;
+  navigator.clipboard.writeText(fullUrl);
+  alert("Link copied to clipboard!");
+  shareMenu?.classList.remove('active');
+};
+
+// Close menu if clicking outside
+document.addEventListener('click', () => shareMenu?.classList.remove('active'));
+</script>
