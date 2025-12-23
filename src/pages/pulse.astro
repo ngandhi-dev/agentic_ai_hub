@@ -59,28 +59,41 @@ const archives = allIssues.sort((a, b) => b.data.date.getTime() - a.data.date.ge
       ) : (
 <div id="reader-modal" class="modal-backdrop">
   <div class="modal-window">
-    <div class="modal-nav">
-      <div class="reader-meta">
-        <span class="label" id="modal-tag">PULSE REPLAY</span>
-        <span class="dot">•</span>
-        <span id="modal-title-small">Issue Insight</span>
+    <header class="modal-header">
+      <div class="header-left">
+        <span id="modal-tag" class="accent-pill">Intellectual Brief</span>
+        <span class="source-label" id="modal-source-name">Agentic Pulse</span>
       </div>
-      <div class="nav-actions">
-        <button id="modal-share-btn" class="share-trigger">
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8"/><polyline points="16 6 12 2 8 6"/><line x1="12" y1="2" x2="12" y2="15"/></svg>
-          <span>Share</span>
-        </button>
-        <button id="close-modal" aria-label="Close">
-          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 6L6 18M6 6l12 12"/></svg>
+      <div class="header-right">
+        <button id="close-modal" class="icon-btn" aria-label="Close">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M18 6L6 18M6 6l12 12"/></svg>
         </button>
       </div>
-    </div>
-    <div id="modal-content-area" class="modal-body">
-      </div>
-    <div class="modal-footer p-8 border-t border-slate-100 flex justify-end">
-        <a id="full-article-btn" href="#" target="_blank" class="bg-blue-600 text-white px-8 py-3 rounded-full font-bold hover:bg-blue-700 transition-all hidden">
-            Read Full Article →
-        </a>
+    </header>
+
+    <div class="modal-body-wrapper">
+      <article class="reading-container">
+        <header class="article-intro">
+          <h1 id="modal-title" class="reading-title"></h1>
+
+          <div class="article-meta">
+            <span id="modal-date">Dec 22, 2025</span>
+            <span class="separator">•</span>
+            <span id="modal-read-time">3 min read</span>
+          </div>
+        </header>
+
+        <div id="modal-content-area" class="prose-content">
+          </div>
+
+        <div class="article-footer-cta">
+          <p>Want to dive deeper?</p>
+          <a id="full-article-btn" href="#" target="_blank" class="primary-button">
+            Read Original Source
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6M15 3h6v6M10 14L21 3"/></svg>
+          </a>
+        </div>
+      </article>
     </div>
   </div>
 </div>
@@ -190,11 +203,19 @@ const archives = allIssues.sort((a, b) => b.data.date.getTime() - a.data.date.ge
 }
   /* Modal Animation & Layout */
   .modal-backdrop { 
-    position: fixed; inset: 0; background: rgba(15, 23, 42, 0.8); 
-    backdrop-filter: blur(12px); z-index: 1000; display: none; 
-    align-items: center; justify-content: center; padding: 20px;
+    position: fixed;
+    inset: 0;
+    background: rgba(255, 255, 255, 0.8);
+    backdrop-filter: blur(12px) saturate(180%);
+    z-index: 1000;
+    opacity: 0;
+    visibility: hidden;
+    transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+    display: flex;
+    justify-content: center;
   }
-  .modal-backdrop.open { display: flex; }
+  .modal-backdrop.open { opacity: 1;
+    visibility: visible; }
   
   .modal-window { 
     background: #fff; width: 100%; max-width: 850px; height: 85vh; 
@@ -202,15 +223,20 @@ const archives = allIssues.sort((a, b) => b.data.date.getTime() - a.data.date.ge
     animation: slideUp 0.3s ease-out;
   }
   .modal-window {
-    background: #ffffff;
-    max-width: 800px;
-    width: 95%;
-    height: 85vh;
-    border-radius: 32px;
-    box-shadow: 0 50px 100px -20px rgba(0,0,0,0.25);
+    background: white;
+    width: 100%;
+    max-width: 900px;
+    height: 100vh;
+    box-shadow: 0 50px 100px -20px rgba(0,0,0,0.15);
+    transform: translateY(100%);
+    transition: transform 0.5s cubic-bezier(0.16, 1, 0.3, 1);
     display: flex;
     flex-direction: column;
-    animation: modalSlideUp 0.4s ease-out;
+    overflow: hidden;
+  }
+
+  .modal-backdrop.open .modal-window {
+    transform: translateY(0);
   }
 
   @keyframes modalSlideUp {
@@ -263,6 +289,96 @@ const archives = allIssues.sort((a, b) => b.data.date.getTime() - a.data.date.ge
     font-weight: 900;
   }
 
+  /* Header Navigation */
+  .modal-header {
+    padding: 20px 40px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 1px solid #f1f5f9;
+    background: rgba(255,255,255,0.7);
+    backdrop-filter: blur(10px);
+    z-index: 10;
+  }
+
+  .accent-pill {
+    background: #2563eb;
+    color: white;
+    font-size: 0.65rem;
+    font-weight: 800;
+    padding: 4px 10px;
+    border-radius: 4px;
+    text-transform: uppercase;
+    margin-right: 12px;
+  }
+
+  /* Reading Typography */
+  .modal-body-wrapper {
+    flex: 1;
+    overflow-y: auto;
+    padding: 60px 40px;
+    scroll-behavior: smooth;
+  }
+
+  .reading-container {
+    max-width: 680px;
+    margin: 0 auto;
+  }
+
+  .reading-title {
+    font-size: 3rem;
+    font-weight: 800;
+    color: #0f172a;
+    line-height: 1.1;
+    letter-spacing: -0.04em;
+    margin-bottom: 24px;
+  }
+
+  .article-meta {
+    color: #64748b;
+    font-size: 0.9rem;
+    font-weight: 500;
+    margin-bottom: 48px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .prose-content {
+    font-size: 1.25rem;
+    line-height: 1.8;
+    color: #334155;
+    font-family: 'Inter', system-ui, sans-serif;
+  }
+
+  /* Call to Action */
+  .article-footer-cta {
+    margin-top: 80px;
+    padding: 40px;
+    background: #f8fafc;
+    border-radius: 24px;
+    text-align: center;
+    border: 1px solid #e2e8f0;
+  }
+
+  .primary-button {
+    display: inline-flex;
+    align-items: center;
+    gap: 12px;
+    background: #0f172a;
+    color: white;
+    padding: 16px 32px;
+    border-radius: 100px;
+    font-weight: 700;
+    text-decoration: none;
+    transition: transform 0.2s ease;
+    margin-top: 16px;
+  }
+
+  .primary-button:hover {
+    transform: scale(1.05);
+    background: #2563eb;
+  }
 
   @keyframes slideUp {
     from { transform: translateY(20px); opacity: 0; }
@@ -577,8 +693,15 @@ const archives = allIssues.sort((a, b) => b.data.date.getTime() - a.data.date.ge
       const summary = trigger.getAttribute('data-summary');
       const externalUrl = trigger.getAttribute('data-url');
       const tag = trigger.getAttribute('data-tag');
+      const date = trigger.getAttribute('data-date'); // Ensure you have this attr
       currentSharedSlug = trigger.getAttribute('data-slug');
-      
+      // 2. Select the title element in the modal
+      const mTitle = document.getElementById('modal-title');
+      const mDate = document.getElementById('modal-date');
+      // 3. Inject the real title
+      if (mTitle) mTitle.innerText = title;
+      if (mDate) mDate.innerText = date;
+
       if (!modal || !modalContent) return;
 
       // 1. Open Modal and show loading
@@ -598,7 +721,6 @@ const archives = allIssues.sort((a, b) => b.data.date.getTime() - a.data.date.ge
 
         // 3. Populate Modal Content
         modalContent.innerHTML = `
-          <h1 style="font-size: 2.5rem; font-weight: 900; margin-bottom: 20px;">${title}</h1>
           <div style="font-size: 1.25rem; line-height: 1.8; color: #334155;">
             <p>${summary}</p>
           </div>
