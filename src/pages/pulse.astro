@@ -192,45 +192,7 @@
             </div>
           </div>
         </div>
-        <div class="grid">
-          {archives.map(issue => (
-            <div 
-              class="issue-card-trigger cursor-pointer" 
-              data-slug={issue.slug}
-              data-title={issue.data.title}
-              data-summary={issue.data.excerpt}
-              data-url={issue.data.externalUrl}
-              data-tag={issue.data.tag}
-              data-is-external={issue.data.isExternal ? "true" : "false"}
-            >
-              <div class="card-header">
-                <span class="category-pill">{issue.data.tag}</span>
-                <div class="read-stats">
-                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
-                  <span>{issue.data.readTime}</span>
-                </div>
-              </div>
-
-              <div class="card-body">
-                <h3>{issue.data.title}</h3>
-                <p class="excerpt">{issue.data.excerpt}</p>
-              </div>
-
-              <div class="card-footer">
-                <div class="footer-left">
-                  <time class="post-date">{issue.data.date.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}</time>
-                  <div class="live-count" data-path={`/pulse/${issue.slug}`}>
-                    <span class="count-number">0</span> views
-                  </div>
-                </div>
-                <div class="view-action">
-                  <span class="text-xs font-bold mr-2">QUICK VIEW</span>
-                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
-                </div>
-              </div>
-            </div>
-          ))}
-        </div>
+        
               )}
             </div>
           </section>
