@@ -1,15 +1,3 @@
-name: Deploy to GitHub Pages
-
-on:
-  push:
-    branches: [master] # Ensure this matches your branch name
-  workflow_dispatch:
-
-permissions:
-  contents: read
-  pages: write
-  id-token: write
-
 jobs:
   build:
     runs-on: ubuntu-latest
@@ -20,25 +8,16 @@ jobs:
       - name: Install, build, and upload
         uses: withastro/action@v3
         env:
+          # This passes the secrets directly into the Astro build engine
           PUBLIC_SUPABASE_URL: ${{ secrets.PUBLIC_SUPABASE_URL }}
           PUBLIC_SUPABASE_ANON_KEY: ${{ secrets.PUBLIC_SUPABASE_ANON_KEY }}
-        # No need to specify the dist folder here;
-        # the official action handles the internal logic.
-
-        # install dependencies and build project
-      - name: Install dependencies
-        run: npm install
-
-      - name: Build project
-        # THIS IS THE CRITICAL PART
-        env:
-          PUBLIC_SUPABASE_URL: ${{ secrets.PUBLIC_SUPABASE_URL }}
-          PUBLIC_SUPABASE_ANON_KEY: ${{ secrets.PUBLIC_SUPABASE_ANON_KEY }}
-        run: npm run build
 
   deploy:
     needs: build
     runs-on: ubuntu-latest
+    permissions:
+      pages: write
+      id-token: write
     environment:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
