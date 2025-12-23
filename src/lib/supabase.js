@@ -1,7 +1,7 @@
 import { createClient } from '@supabase/supabase-js'
 
-const supabaseUrl = import.meta.env.PUBLIC_SUPABASE_URL || 'https://placeholder.supabase.co';
-const supabaseAnonKey = import.meta.env.PUBLIC_SUPABASE_ANON_KEY || 'placeholder-key';
+const supabaseUrl = import.meta.env.PUBLIC_SUPABASE_URL || 'https://nokustzcyvjrzvfblshh.supabase.co';
+const supabaseAnonKey = import.meta.env.PUBLIC_SUPABASE_ANON_KEY || 'sb_publishable_763rYqcOXf62GGQTYFCLhw_qPICkVFV';
 
 // Add this temporary log to see if variables are loading
 console.log("Supabase URL loaded:", !!supabaseUrl); 
