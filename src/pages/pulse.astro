@@ -78,7 +78,36 @@
                 <svg class="search-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg>
                   <input type="text" id="pulse-search" placeholder="Search breakthroughs by topic, source, or keyword..." autocomplete="off"/>
                   <div id="search-results-count" class="results-badge"></div>
-              </div>
+                  <div class="filter-bar">
+                  
+                  <span class="filter-label">Quick Filters:</span>
+                  <button id="toggle-bookmarks" class="filter-chip">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" class="chip-icon"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg>
+                    <span>Saved Only</span>
+                    <span id="bookmark-count" class="chip-count">0</span>
+                  </button>
+
+                  <div class="filter-dropdown">
+                    <select id="filter-tag" class="filter-select">
+                      <option value="all">All Tags</option>
+                      <option value="News">News</option>
+                      <option value="Research">Research</option>
+                      <option value="Tools">Tools</option>
+                      <option value="Agentic AI">Agentic AI</option>
+                    </select>
+                  </div>
+
+                  <div class="filter-dropdown">
+                    <select id="filter-source" class="filter-select">
+                      <option value="all">All Sources</option>
+                      <option value="internal">Internal Pulse</option>
+                      <option value="external">External Sources</option>
+                    </select>
+                  </div>
+
+                </div>
+                <button id="clear-filters" class="text-link-btn hidden">Clear All</button>
+              </div>              
             </div>
 
         <div class="pulse-container">
@@ -125,12 +154,22 @@
                         >
                           <div class="card-header">
                             <span class="category-pill">{issue.data.tag}</span>
+                            <div class="header-actions">
+                            <button 
+                              class="bookmark-btn" 
+                              data-slug={issue.slug} 
+                              aria-label="Bookmark this card"
+                            >
+                              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/>
+                              </svg>
+                            </button>
                             <div class="read-stats">
                               <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
                               <span>{issue.data.readTime}</span>
                             </div>
                           </div>
-
+                          </div>
                           <div class="card-body">
                             <h3>{issue.data.title}</h3>
                             <p class="excerpt">{issue.data.excerpt}</p>
@@ -1045,6 +1084,188 @@
 
         /* Classes for hiding sections during search */
         .hidden { display: none !important; }
+
+        .header-actions {
+          display: flex;
+          align-items: center;
+          gap: 12px;
+        }
+
+        .bookmark-btn {
+          background: none;
+          border: none;
+          padding: 4px;
+          cursor: pointer;
+          color: #94a3b8;
+          transition: all 0.2s ease;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+        }
+
+        .bookmark-btn:hover {
+          color: #2563eb;
+          transform: scale(1.1);
+        }
+
+        /* State when bookmarked */
+        .bookmark-btn.is-bookmarked {
+          color: #2563eb;
+        }
+        
+        .bookmark-btn.is-bookmarked svg {
+          fill: #2563eb;
+        }
+
+        .filter-pill {
+          position: absolute;
+          right: 80px; /* Positioned to the left of the results badge */
+          display: flex;
+          align-items: center;
+          gap: 6px;
+          padding: 6px 14px;
+          background: #f1f5f9;
+          border: 1px solid #e2e8f0;
+          border-radius: 100px;
+          font-size: 0.75rem;
+          font-weight: 700;
+          color: #64748b;
+          cursor: pointer;
+          transition: all 0.2s ease;
+          z-index: 10;
+        }
+
+        .filter-pill:hover {
+          background: #e2e8f0;
+          color: #0f172a;
+        }
+
+        /* The Active/On State */
+        .filter-pill.active {
+          background: #2563eb;
+          color: #ffffff;
+          border-color: #2563eb;
+          box-shadow: 0 4px 10px rgba(37, 99, 235, 0.2);
+        }
+
+        .pill-icon {
+          transition: transform 0.2s ease;
+        }
+
+        .filter-pill.active .pill-icon {
+          fill: currentColor;
+          transform: scale(1.1);
+        }
+
+        /* Responsive adjustment for mobile */
+        @media (max-width: 640px) {
+          .filter-pill {
+            position: static;
+            margin-top: 10px;
+            width: fit-content;
+          }
+        }
+
+        .filter-bar {
+          display: flex;
+          align-items: center;
+          gap: 12px;
+          margin-top: 16px;
+          padding: 0 10px;
+        }
+
+        .filter-label {
+          font-size: 0.75rem;
+          font-weight: 700;
+          color: #94a3b8;
+          text-transform: uppercase;
+          letter-spacing: 0.05em;
+        }
+
+        .filter-chip {
+          display: flex;
+          align-items: center;
+          gap: 8px;
+          padding: 8px 16px;
+          background: #ffffff;
+          border: 1px solid #e2e8f0;
+          border-radius: 100px;
+          font-size: 0.85rem;
+          font-weight: 600;
+          color: #475569;
+          cursor: pointer;
+          transition: all 0.2s ease;
+        }
+
+        .filter-chip:hover {
+          border-color: #cbd5e1;
+          background: #f8fafc;
+        }
+
+        /* Active State */
+        .filter-chip.active {
+          background: #0f172a; /* Dark sleek professional look */
+          color: #ffffff;
+          border-color: #0f172a;
+        }
+
+        .filter-chip.active .chip-icon {
+          fill: #2563eb; /* Blue pop for the icon only */
+          stroke: #2563eb;
+        }
+
+        .chip-count {
+          background: #f1f5f9;
+          color: #475569;
+          font-size: 0.7rem;
+          padding: 2px 8px;
+          border-radius: 10px;
+          margin-left: 4px;
+        }
+
+        .filter-chip.active .chip-count {
+          background: rgba(255, 255, 255, 0.2);
+          color: #ffffff;
+        }
+
+        .filter-select {
+          padding: 8px 16px;
+          background: #ffffff;
+          border: 1px solid #e2e8f0;
+          border-radius: 100px;
+          font-size: 0.85rem;
+          font-weight: 600;
+          color: #475569;
+          cursor: pointer;
+          appearance: none; /* Removes default browser arrow */
+          background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%23475569' stroke-width='3' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");
+          background-repeat: no-repeat;
+          background-position: right 12px center;
+          padding-right: 32px;
+          transition: all 0.2s ease;
+        }
+
+        .filter-select:hover {
+          border-color: #cbd5e1;
+        }
+
+        /* Highlight select when a filter is active */
+        .filter-select.active {
+          background-color: #0f172a;
+          color: white;
+          border-color: #0f172a;
+          background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='white' stroke-width='3' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");
+        }
+
+        .text-link-btn {
+          font-size: 0.75rem;
+          font-weight: 700;
+          color: #ef4444; /* Red for clear */
+          background: none;
+          border: none;
+          cursor: pointer;
+          text-decoration: underline;
+        }
         </style>
 
         <script>
@@ -1356,5 +1577,176 @@
           } else {
             resultsBadge.style.display = 'none';
           }
+        });
+
+        // --- 6. BOOKMARKING LOGIC ---
+        const bookmarkBtns = document.querySelectorAll('.bookmark-btn');
+
+        // Function to get bookmarks from LocalStorage
+        function getBookmarks() {
+          const saved = localStorage.getItem('pulse_bookmarks');
+          return saved ? JSON.parse(saved) : [];
+        }
+
+        // Function to update UI based on saved bookmarks
+        function initBookmarks() {
+          const bookmarks = getBookmarks();
+          bookmarkBtns.forEach(btn => {
+            const slug = btn.getAttribute('data-slug');
+            if (bookmarks.includes(slug)) {
+              btn.classList.add('is-bookmarked');
+            }
+          });
+        }
+
+        // Handle Click Events
+        bookmarkBtns.forEach(btn => {
+          btn.addEventListener('click', (e) => {
+            e.stopPropagation(); // Prevent opening the modal when clicking bookmark
+            
+            const slug = btn.getAttribute('data-slug');
+            let bookmarks = getBookmarks();
+
+            if (bookmarks.includes(slug)) {
+              // Remove bookmark
+              bookmarks = bookmarks.filter(b => b !== slug);
+              btn.classList.remove('is-bookmarked');
+            } else {
+              // Add bookmark
+              bookmarks.push(slug);
+              btn.classList.add('is-bookmarked');
+            }
+
+            localStorage.setItem('pulse_bookmarks', JSON.stringify(bookmarks));
+          });
+        });
+
+        // Run on page load
+        initBookmarks();
+
+        const toggleBtn = document.getElementById('toggle-bookmarks');
+        let showingOnlyBookmarks = false;
+        const bookmarkCountBadge = document.getElementById('bookmark-count');
+
+        // Function to update the count on the button itself
+        function updateBookmarkUI() {
+          const bookmarks = getBookmarks();
+          if (bookmarkCountBadge) {
+            bookmarkCountBadge.innerText = bookmarks.length;
+          }
+        }
+        toggleBtn?.addEventListener('click', () => {
+          showingOnlyBookmarks = !showingOnlyBookmarks;
+          const isNowActive = toggleBtn.classList.toggle('active');
+          const bookmarks = getBookmarks();
+
+          // Reuse your visibility update logic
+          updateVisibility(isNowActive, bookmarks);
+          
+          toggleBtn.classList.toggle('active', showingOnlyBookmarks);
+
+          cards.forEach(card => {
+            const slug = card.getAttribute('data-slug');
+            if (showingOnlyBookmarks && !bookmarks.includes(slug)) {
+              card.classList.add('hidden');
+            } else {
+              // Respect the current search query if applicable
+              card.classList.remove('hidden'); 
+            }
+          });
+          
+          // Reuse your existing logic to hide empty month/week headers
+          updateSectionVisibility(); 
+        });
+
+        function updateVisibility(onlyBookmarks, bookmarks) {
+        const cards = document.querySelectorAll('.issue-card-trigger');
+        
+        cards.forEach(card => {
+          const slug = card.getAttribute('data-slug');
+          const matchesSearch = !card.classList.contains('search-hidden'); // Check search state
+          
+          if (onlyBookmarks) {
+            if (bookmarks.includes(slug) && matchesSearch) {
+              card.classList.remove('hidden');
+            } else {
+              card.classList.add('hidden');
+            }
+          } else {
+            // If filter is off, respect search results
+            card.classList.toggle('hidden', !matchesSearch);
+          }
+        });
+        // Re-run header visibility check (the logic from search script)
+        checkSectionHeaders();
+        }
+
+        // Initialize on load
+        updateBookmarkUI();
+
+        // --- 8. MULTI-FILTER ENGINE ---
+      const tagSelect = document.getElementById('filter-tag');
+      const sourceSelect = document.getElementById('filter-source');
+      const clearBtn = document.getElementById('clear-filters');
+
+      const updateAllFilters = () => {
+        const activeTag = tagSelect.value;
+        const activeSource = sourceSelect.value;
+        const onlySaved = toggleBtn.classList.contains('active');
+        const searchQuery = searchInput.value.toLowerCase();
+        const bookmarks = getBookmarks();
+
+        let visibleCount = 0;
+
+        // Track if any filter is actually on to show "Clear All"
+        const filtersActive = activeTag !== 'all' || activeSource !== 'all' || onlySaved || searchQuery !== '';
+        clearBtn.classList.toggle('hidden', !filtersActive);
+
+        // Apply style to select boxes if active
+        tagSelect.classList.toggle('active', activeTag !== 'all');
+        sourceSelect.classList.toggle('active', activeSource !== 'all');
+
+        cards.forEach(card => {
+          const cardTag = card.getAttribute('data-tag');
+          const isExternal = card.getAttribute('data-is-external') === "true";
+          const slug = card.getAttribute('data-slug');
+          const title = card.getAttribute('data-title').toLowerCase();
+
+          // The Logic Matrix
+          const matchesTag = activeTag === 'all' || cardTag === activeTag;
+          const matchesSource = activeSource === 'all' || 
+                              (activeSource === 'external' && isExternal) || 
+                              (activeSource === 'internal' && !isExternal);
+          const matchesSaved = !onlySaved || bookmarks.includes(slug);
+          const matchesSearch = title.includes(searchQuery);
+
+          if (matchesTag && matchesSource && matchesSaved && matchesSearch) {
+            card.classList.remove('hidden');
+            visibleCount++;
+          } else {
+            card.classList.add('hidden');
+          }
+        });
+
+        // Update Headers and Badges
+        checkSectionHeaders(); // Your existing function to hide empty months/weeks
+        if (resultsBadge) resultsBadge.innerText = `${visibleCount} results`;
+        };
+
+        // Listeners
+        tagSelect.addEventListener('change', updateAllFilters);
+        sourceSelect.addEventListener('change', updateAllFilters);
+        toggleBtn.addEventListener('click', () => {
+          toggleBtn.classList.toggle('active');
+          updateAllFilters();
+        });
+        searchInput.addEventListener('input', updateAllFilters);
+
+        clearBtn.addEventListener('click', () => {
+          tagSelect.value = 'all';
+          sourceSelect.value = 'all';
+          toggleBtn.classList.remove('active');
+          searchInput.value = '';
+          updateAllFilters();
         });
         </script>
