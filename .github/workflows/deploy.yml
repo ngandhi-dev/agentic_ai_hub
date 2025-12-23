@@ -1,3 +1,17 @@
+name: Deploy to GitHub Pages
+
+on:
+  # Trigger the workflow on pushes to the master branch
+  push:
+    branches: [master]
+  # Allows you to run this workflow manually from the Actions tab
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
 jobs:
   build:
     runs-on: ubuntu-latest
@@ -8,16 +22,13 @@ jobs:
       - name: Install, build, and upload
         uses: withastro/action@v3
         env:
-          # This passes the secrets directly into the Astro build engine
+          # These MUST match the names in your GitHub Secrets
           PUBLIC_SUPABASE_URL: ${{ secrets.PUBLIC_SUPABASE_URL }}
           PUBLIC_SUPABASE_ANON_KEY: ${{ secrets.PUBLIC_SUPABASE_ANON_KEY }}
 
   deploy:
     needs: build
     runs-on: ubuntu-latest
-    permissions:
-      pages: write
-      id-token: write
     environment:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
