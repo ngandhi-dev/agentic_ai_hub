@@ -1,7 +1,7 @@
 import { createClient } from '@supabase/supabase-js'
 
-const supabaseUrl = import.meta.env.PUBLIC_SUPABASE_URL
-const supabaseAnonKey = import.meta.env.PUBLIC_SUPABASE_ANON_KEY
+const supabaseUrl = import.meta.env.PUBLIC_SUPABASE_URL || 'https://placeholder.supabase.co';
+const supabaseAnonKey = import.meta.env.PUBLIC_SUPABASE_ANON_KEY || 'placeholder-key';
 
 // Add this temporary log to see if variables are loading
 console.log("Supabase URL loaded:", !!supabaseUrl); 
@@ -10,5 +10,7 @@ console.log("Supabase URL loaded:", !!supabaseUrl);
 if (!supabaseUrl || !supabaseKey) {
   console.warn("Supabase credentials missing!");
 }
-
+if (import.meta.env.PUBLIC_SUPABASE_URL === undefined) {
+  console.warn("⚠️ BUILD WARNING: PUBLIC_SUPABASE_URL is undefined. Check GitHub Secrets.");
+}
 export const supabase = createClient(supabaseUrl, supabaseAnonKey)
