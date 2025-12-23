@@ -19,6 +19,9 @@ jobs:
 
       - name: Install, build, and upload
         uses: withastro/action@v3
+        env:
+          PUBLIC_SUPABASE_URL: ${{ secrets.PUBLIC_SUPABASE_URL }}
+          PUBLIC_SUPABASE_ANON_KEY: ${{ secrets.PUBLIC_SUPABASE_ANON_KEY }}
         # No need to specify the dist folder here;
         # the official action handles the internal logic.
 
