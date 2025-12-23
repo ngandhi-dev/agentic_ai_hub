@@ -5,10 +5,7 @@ import node from '@astrojs/node'; // or cloudflare/vercel/netlify
 
 export default defineConfig({
   integrations: [tailwind()],
-  output: 'server', // Changes from static to server-ready
-  adapter: node({
-    mode: 'standalone',
-  }),
+  output: 'static', // Changes from static to server-ready
   markdown: {
     shikiConfig: {
       // You can choose from Shiki's built-in themes
