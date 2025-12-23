@@ -1,0 +1,144 @@
+---
+// src/pages/preview/newsletter.astro
+import { supabase } from '../../lib/supabase';
+
+// 1. Fetch data exactly like the newsletter script would
+const lastWeek = new Date();
+lastWeek.setDate(lastWeek.getDate() - 7);
+
+const { data: articles, error } = await supabase
+  .from('archives')
+  .select('title, summary, url, tag')
+  .gte('created_at', lastWeek.toISOString())
+  .order('created_at', { ascending: false })
+  .limit(5);
+
+const weekLabel = `The Pulse: Week of ${new Date().toLocaleDateString('en-US', { month: 'long', day: 'numeric' })}`;
+const subject = `Agentic Pulse | Week of ${new Date().toLocaleDateString()}`;
+
+// 2. Define colors to match your newsletter branding
+const colors = {
+  bodyBg: "#f8fafc",
+  cardBg: "#ffffff",
+  textMain: "#0f172a",
+  textMuted: "#64748b",
+  accentBlue: "#2563eb",
+};
+---
+
+<html lang="en">
+<head>
+    <title>Newsletter Preview | Agentic Pulse</title>
+    <meta charset="utf-8" />
+    <meta name="robots" content="noindex, nofollow">
+    <style>
+        body { margin: 0; padding: 0; background-color: #e2e8f0; }
+        .preview-notice { 
+            background: #0f172a; color: white; padding: 10px; 
+            text-align: center; font-family: sans-serif; font-size: 13px;
+        }
+    </style>
+</head>
+<body>
+    <div class="preview-notice">
+        🛠️ <strong>Internal Preview:</strong> This is how the newsletter will appear in subscriber inboxes.
+    </div>
+
+    <div style={`background-color: ${colors.bodyBg}; padding: 40px 10px; font-family: sans-serif;`}>
+        <table align="center" border="0" cellpadding="0" cellspacing="0" width="100%" style="max-width: 600px; background-color: {colors.cardBg}; border-radius: 24px; border: 1px solid #e2e8f0; margin: 0 auto;">
+            <tr>
+                <td style="padding: 40px; border-bottom: 1px solid #f1f5f9;">
+                    <span style={`background: ${colors.accentBlue}; color: #ffffff; padding: 4px 10px; border-radius: 4px; font-size: 11px; font-weight: 800; text-transform: uppercase;`}>
+                        Weekly Intelligence
+                    </span>
+                    <h1 style={`font-size: 24px; font-weight: 800; color: ${colors.textMain}; margin: 16px 0 8px 0;`}>
+                        {weekLabel}
+                    </h1>
+                </td>
+            </tr>
+            <tr>
+                <td style="padding: 40px;">
+                    {articles && articles.map((art) => (
+                        <div style="margin-bottom: 40px; border-bottom: 1px solid #f8fafc; padding-bottom: 30px;">
+                            <span style={`color: ${colors.accentBlue}; font-size: 11px; font-weight: 700; text-transform: uppercase;`}>
+                                [{art.tag}]
+                            </span>
+                            <h2 style={`font-size: 19px; font-weight: 800; color: ${colors.textMain}; margin: 8px 0 12px 0;`}>
+                                {art.title}
+                            </h2>
+                            <p style="color: #475569; font-size: 15px; line-height: 1.6;">
+                                {art.summary}
+                            </p>
+                            <a href={art.url} style={`color: ${colors.accentBlue}; font-weight: 700; text-decoration: none; font-size: 14px;`}>
+                                Read Full Briefing →
+                            </a>
+                        </div>
+                    ))}
+                </td>
+            </tr>
+        </table>
+    </div>
+    <div class="admin-bar">
+    <button id="send-test-btn" class="btn-primary">Send Test to Inbox</button>
+    <span id="status-msg"></span>
+</div>
+</body>
+</html>
+
+<style>
+    .admin-bar {
+        position: fixed;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        background: #0f172a;
+        padding: 15px;
+        display: flex;
+        justify-content: center;
+        gap: 20px;
+        align-items: center;
+        border-top: 1px solid #1e293b;
+    }
+    .btn-primary {
+        background: #2563eb;
+        color: white;
+        border: none;
+        padding: 10px 20px;
+        border-radius: 6px;
+        font-weight: 600;
+        cursor: pointer;
+    }
+    .btn-primary:disabled { opacity: 0.5; }
+    #status-msg { color: #94a3b8; font-size: 14px; font-family: sans-serif; }
+</style>
+
+<script is:inline define:vars={{ subject }}>
+    const btn = document.getElementById('send-test-btn');
+    const status = document.getElementById('status-msg');
+
+    btn.addEventListener('click', async () => {
+        btn.disabled = true;
+        status.innerText = 'Sending...';
+
+        // Grabs the HTML from the specific email container we created
+        const emailHtml = document.querySelector('[style*="background-color: #f8fafc"]').outerHTML;
+
+        try {
+            const res = await fetch('/api/send-test', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ html: emailHtml, subject: subject })
+            });
+
+            if (res.ok) {
+                status.innerText = '✅ Sent successfully!';
+            } else {
+                status.innerText = '❌ Error sending.';
+            }
+        } catch (e) {
+            status.innerText = '❌ Request failed.';
+        } finally {
+            btn.disabled = false;
+        }
+    });
+</script>

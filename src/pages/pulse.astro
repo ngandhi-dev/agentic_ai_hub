@@ -1,831 +1,1291 @@
----
-import Layout from '../layouts/Layout.astro';
-import Navigation from '../components/Navigation.astro';
-import Footer from '../components/footer.astro';
-import { getCollection } from 'astro:content';
-import { supabase } from '../lib/supabase'; // Import the client
+        ---
+        import Layout from '../layouts/Layout.astro';
+        import Navigation from '../components/Navigation.astro';
+        import Footer from '../components/footer.astro';
+        import { getCollection } from 'astro:content';
+        import { supabase } from '../lib/supabase'; // Import the client
 
-// Pulling real external data from /src/content/pulse/
-const localIssues = await getCollection('pulse');
-//const archives = localIssues.sort((a, b) => b.data.date.getTime() - a.data.date.getTime());
+        // Pulling real external data from /src/content/pulse/
+        const localIssues = await getCollection('pulse');
+        //const archives = localIssues.sort((a, b) => b.data.date.getTime() - a.data.date.getTime());
 
-// 2. Pull external data from Supabase 'archives' table
-const { data: dbIssues, error } = await supabase
-  .from('archives')
-  .select('*')
-  .order('created_at', { ascending: false });
+        // 2. Pull external data from Supabase 'archives' table
+        const { data: dbIssues, error } = await supabase
+          .from('archives')
+          .select('*')
+          .order('created_at', { ascending: false });
 
-if (error) {
-  console.error("Supabase Fetch Error:", error.message);
-}
+        if (error) {
+          console.error("Supabase Fetch Error:", error.message);
+        }       
+        
+        // 3. Format Supabase data to match the Astro "issue" structure
+        const formattedDbIssues = (dbIssues || []).map(item => ({
+          slug: item.url, // or item.id if you prefer
+          data: {
+            title: item.title,
+            date: new Date(item.created_at),
+            excerpt: item.summary,
+            tag: item.tag || 'News',
+            readTime: '2 min', // Default for news snippets
+            isExternal: true, // Helper flag
+            externalUrl: item.url
+          }
+        }));
 
-// 3. Format Supabase data to match the Astro "issue" structure
-const formattedDbIssues = (dbIssues || []).map(item => ({
-  slug: item.url, // or item.id if you prefer
-  data: {
-    title: item.title,
-    date: new Date(item.created_at),
-    excerpt: item.summary,
-    tag: item.tag || 'News',
-    readTime: '2 min', // Default for news snippets
-    isExternal: true, // Helper flag
-    externalUrl: item.url
-  }
-}));
+        // 4. Merge both sources and sort by date
+        const allIssues = [...localIssues, ...formattedDbIssues];
+        const archives = allIssues.sort((a, b) => b.data.date.getTime() - a.data.date.getTime());
 
-// 4. Merge both sources and sort by date
-const allIssues = [...localIssues, ...formattedDbIssues];
-const archives = allIssues.sort((a, b) => b.data.date.getTime() - a.data.date.getTime());
----
+        // Grouping logic for the Table of Contents
+        const pulseGroups = archives.reduce((acc, issue) => {
+        const date = new Date(issue.data.date);
+        const monthName = date.toLocaleString('en-US', { month: 'long', year: 'numeric' });
+          
+        // Calculate "Week of..."
+        const startOfWeek = new Date(date);
+        startOfWeek.setDate(date.getDate() - date.getDay() + 1);
+        const weekLabel = `Week of ${startOfWeek.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}`;
 
-<Layout title="Archive | Agentic Pulse">
-  <Navigation />
-  
-  <main class="archive-main">
-    <section class="archive-hero">
-      <div class="container">
-        <span class="badge">LATEST UPDATES</span>
-        <h1>Agentic Pulse Archive</h1>
-        <p>Your technical timeline for autonomous AI Agent breakthroughs.</p>
-      </div>
-    </section>
+        if (!acc[monthName]) acc[monthName] = { weeks: {} };
+        if (!acc[monthName].weeks[weekLabel]) acc[monthName].weeks[weekLabel] = [];
+          
+        acc[monthName].weeks[weekLabel].push(issue);
+        return acc;
+        }, {});
+        ---
 
-    <section class="archive-list">
-    <div class="container">
-      {archives.length === 0 ? (
-        <div class="empty-state">
-          <p>No issues found. Please check your <code>src/content/pulse/</code> folder.</p>
+        <Layout title="Archive | Agentic Pulse">
+          <Navigation />  
+          <main class="archive-main">
+            <section class="archive-hero">
+              <div class="container">
+                <span class="badge">LATEST UPDATES</span>
+                <h1>Agentic Pulse Archive</h1>
+                <p>Your technical timeline for autonomous AI Agent breakthroughs.</p>
+              </div>
+            </section>
+
+            <section class="archive-list">
+            <div class="container">
+              {archives.length === 0 ? (
+                <div class="empty-state">
+                  <p>No issues found. Please check your <code>src/content/pulse/</code> folder.</p>
+                </div>
+              ) : (
+
+        <div class="pulse-container">
+          <aside class="pulse-sidebar">
+            <nav class="toc-nav">
+              <div class="toc-header">Archive Index</div>
+              {Object.entries(pulseGroups).map(([month, data]) => (
+                <div class="toc-month-section">
+                  <a href={`#${month.replace(/\s+/g, '-').toLowerCase()}`} class="toc-month-link">{month}</a>
+                  <ul class="toc-week-list">
+                    {Object.keys(data.weeks).map(week => (
+                      <li>
+                        <a href={`#${week.replace(/\s+/g, '-').toLowerCase()}`} class="toc-week-link">
+                          {week}
+                        </a>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              ))}
+            </nav>
+          </aside>
+
+          <main class="pulse-main">
+            {Object.entries(pulseGroups).map(([month, data]) => (
+            <section id={month.replace(/\s+/g, '-').toLowerCase()} class="month-block">
+                <h2 class="sticky-month-label">{month}</h2>
+                
+                {Object.entries(data.weeks).map(([week, issues]) => (
+                  /* The ID here is what the sidebar links target */
+                  <div id={week.replace(/\s+/g, '-').toLowerCase()} class="week-block">
+                    <h3 class="week-sublabel">{week}</h3>
+                    
+                    <div class="grid">
+                      {issues.map(issue => (
+                        <div 
+                          class="issue-card-trigger cursor-pointer" 
+                          data-slug={issue.slug}
+                          data-title={issue.data.title}
+                          data-summary={issue.data.excerpt}
+                          data-url={issue.data.externalUrl}
+                          data-tag={issue.data.tag}
+                          data-is-external={issue.data.isExternal ? "true" : "false"}
+                        >
+                          <div class="card-header">
+                            <span class="category-pill">{issue.data.tag}</span>
+                            <div class="read-stats">
+                              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
+                              <span>{issue.data.readTime}</span>
+                            </div>
+                          </div>
+
+                          <div class="card-body">
+                            <h3>{issue.data.title}</h3>
+                            <p class="excerpt">{issue.data.excerpt}</p>
+                          </div>
+
+                          <div class="card-footer">
+                            <div class="footer-left">
+                              <time class="post-date">{issue.data.date.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}</time>
+                            </div>
+                            <div class="view-action">
+                              <span class="text-xs font-bold mr-2">QUICK VIEW</span>
+                              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+                            </div>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                ))}
+              </section>
+            ))}
+          </main>
         </div>
-      ) : (
-<div id="reader-modal" class="modal-backdrop">
-  <div class="modal-window">
-    <header class="modal-header">
-      <div class="header-left">
-        <span id="modal-tag" class="accent-pill">Intellectual Brief</span>
-        <span class="source-label" id="modal-source-name">Agentic Pulse</span>
-      </div>
-      <div class="header-right">
-        <button id="close-modal" class="icon-btn" aria-label="Close">
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M18 6L6 18M6 6l12 12"/></svg>
+
+        <div id="reader-modal" class="modal-backdrop">
+          <div class="modal-window">
+            <div class="reading-progress-container">
+              <div id="reading-progress-bar" class="progress-fill"></div>
+            </div>
+
+            <header class="modal-header">
+              <div class="header-left">
+                <span id="modal-tag" class="accent-pill">Intellectual Brief</span>
+                <span class="source-label" id="modal-source-name">Agentic Pulse</span>
+              </div>
+              <div class="header-right">
+                <button id="close-modal" class="icon-btn" aria-label="Close">
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M18 6L6 18M6 6l12 12"/></svg>
+                </button>
+              </div>
+            </header>
+
+            <div class="modal-body-wrapper">
+              <article class="reading-container">
+                <header class="article-intro">
+                  <h1 id="modal-title" class="reading-title"></h1>
+
+                  <div class="article-meta">
+                    <span id="modal-date">Dec 22, 2025</span>
+                    <span class="separator">•</span>
+                    <span id="modal-read-time">3 min read</span>
+                  </div>
+                </header>
+
+                <div id="modal-content-area" class="prose-content">
+                  </div>
+
+                <div class="article-footer-cta">
+                  <p>Want to dive deeper?</p>
+                  <a id="full-article-btn" href="#" target="_blank" class="primary-button">
+                    Read Original Source
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6M15 3h6v6M10 14L21 3"/></svg>
+                  </a>
+                </div>
+              </article>
+            </div>
+          </div>
+        </div>
+        <div class="grid">
+          {archives.map(issue => (
+            <div 
+              class="issue-card-trigger cursor-pointer" 
+              data-slug={issue.slug}
+              data-title={issue.data.title}
+              data-summary={issue.data.excerpt}
+              data-url={issue.data.externalUrl}
+              data-tag={issue.data.tag}
+              data-is-external={issue.data.isExternal ? "true" : "false"}
+            >
+              <div class="card-header">
+                <span class="category-pill">{issue.data.tag}</span>
+                <div class="read-stats">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
+                  <span>{issue.data.readTime}</span>
+                </div>
+              </div>
+
+              <div class="card-body">
+                <h3>{issue.data.title}</h3>
+                <p class="excerpt">{issue.data.excerpt}</p>
+              </div>
+
+              <div class="card-footer">
+                <div class="footer-left">
+                  <time class="post-date">{issue.data.date.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}</time>
+                  <div class="live-count" data-path={`/pulse/${issue.slug}`}>
+                    <span class="count-number">0</span> views
+                  </div>
+                </div>
+                <div class="view-action">
+                  <span class="text-xs font-bold mr-2">QUICK VIEW</span>
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
+              )}
+            </div>
+          </section>
+          </main>
+
+          <div id="reader-modal" class="modal-backdrop">
+            <div class="modal-window">
+              <div class="modal-nav">
+          <div class="reader-meta">
+            <span class="label">PULSE REPLAY</span>
+            <span class="dot">•</span>
+            <span id="modal-title-small">Issue Insight</span>
+          </div>
+          <div class="nav-actions">
+                <button id="modal-share-btn" class="share-trigger">
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8"/><polyline points="16 6 12 2 8 6"/><line x1="12" y1="2" x2="12" y2="15"/></svg>
+                  <span>Share</span>
+                </button>
+                
+                <button id="close-modal" aria-label="Close">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 6L6 18M6 6l12 12"/></svg>
+            </button>
+          </div>
+          </div>
+              <div id="modal-content-area" class="modal-body">
+                <div class="loading-state">
+                  <div class="spinner"></div>
+                  <p>Fetching the pulse...</p>
+                </div>        
+              </div>
+            </div>
+            </div>  
+          <Footer />
+          <button id="back-to-top" class="back-to-top" aria-label="Back to top">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M18 15l-6-6-6 6"/>
+            </svg>
         </button>
-      </div>
-    </header>
-
-    <div class="modal-body-wrapper">
-      <article class="reading-container">
-        <header class="article-intro">
-          <h1 id="modal-title" class="reading-title"></h1>
-
-          <div class="article-meta">
-            <span id="modal-date">Dec 22, 2025</span>
-            <span class="separator">•</span>
-            <span id="modal-read-time">3 min read</span>
-          </div>
-        </header>
-
-        <div id="modal-content-area" class="prose-content">
-          </div>
-
-        <div class="article-footer-cta">
-          <p>Want to dive deeper?</p>
-          <a id="full-article-btn" href="#" target="_blank" class="primary-button">
-            Read Original Source
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6M15 3h6v6M10 14L21 3"/></svg>
-          </a>
-        </div>
-      </article>
-    </div>
-  </div>
-</div>
-<div class="grid">
-  {archives.map(issue => (
-    <div 
-      class="issue-card-trigger cursor-pointer" 
-      data-slug={issue.slug}
-      data-title={issue.data.title}
-      data-summary={issue.data.excerpt}
-      data-url={issue.data.externalUrl}
-      data-tag={issue.data.tag}
-      data-is-external={issue.data.isExternal ? "true" : "false"}
-    >
-      <div class="card-header">
-        <span class="category-pill">{issue.data.tag}</span>
-        <div class="read-stats">
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
-          <span>{issue.data.readTime}</span>
-        </div>
-      </div>
-
-      <div class="card-body">
-        <h3>{issue.data.title}</h3>
-        <p class="excerpt">{issue.data.excerpt}</p>
-      </div>
-
-      <div class="card-footer">
-        <div class="footer-left">
-          <time class="post-date">{issue.data.date.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}</time>
-          <div class="live-count" data-path={`/pulse/${issue.slug}`}>
-             <span class="count-number">0</span> views
-          </div>
-        </div>
-        <div class="view-action">
-          <span class="text-xs font-bold mr-2">QUICK VIEW</span>
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
-        </div>
-      </div>
-    </div>
-  ))}
-</div>
-      )}
-    </div>
-  </section>
-  </main>
-
-  <div id="reader-modal" class="modal-backdrop">
-    <div class="modal-window">
-      <div class="modal-nav">
-  <div class="reader-meta">
-    <span class="label">PULSE REPLAY</span>
-    <span class="dot">•</span>
-    <span id="modal-title-small">Issue Insight</span>
-  </div>
-  <div class="nav-actions">
-        <button id="modal-share-btn" class="share-trigger">
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8"/><polyline points="16 6 12 2 8 6"/><line x1="12" y1="2" x2="12" y2="15"/></svg>
-          <span>Share</span>
-        </button>
-        
-        <button id="close-modal" aria-label="Close">
-        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 6L6 18M6 6l12 12"/></svg>
-    </button>
-  </div>
-  </div>
-      <div id="modal-content-area" class="modal-body">
-        <div class="loading-state">
-          <div class="spinner"></div>
-          <p>Fetching the pulse...</p>
-        </div>        
-      </div>
-    </div>
-    </div>  
-  <Footer />
-</Layout>
-
-<style>
-  /* Basic Styles */
-  .archive-main { padding-top: 80px; min-height: 100vh; font-family: 'Inter', sans-serif; }
-  .container { max-width: 1100px; margin: 0 auto; padding: 0 20px; }
-  
-  .archive-hero { background: #0f172a; padding: 80px 0; color: white; text-align: center; }
-  .archive-hero h1 { font-size: 3rem; font-weight: 900; letter-spacing: -0.04em; }
-  
-  
-  .tag { background: #eff6ff; color: #2563eb; font-size: 0.7rem; font-weight: 700; padding: 4px 10px; border-radius: 99px; text-transform: uppercase; }
-  .read-time { font-size: 0.75rem; color: #94a3b8; font-weight: 600; }
-  h3 { font-size: 1.4rem; font-weight: 800; margin: 15px 0 10px; color: #0f172a; }
-  
-  .nav-actions {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-}
-.share-trigger {
-  background: #eff6ff; /* Light blue background */
-  color: #2563eb;      /* Bright blue text */
-  border: none;
-  padding: 6px 14px;
-  border-radius: 99px;
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  font-weight: 700;
-  cursor: pointer;
-}
-  /* Modal Animation & Layout */
-  .modal-backdrop { 
-    position: fixed;
-    inset: 0;
-    background: rgba(255, 255, 255, 0.8);
-    backdrop-filter: blur(12px) saturate(180%);
-    z-index: 1000;
-    opacity: 0;
-    visibility: hidden;
-    transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
-    display: flex;
-    justify-content: center;
-  }
-  .modal-backdrop.open { opacity: 1;
-    visibility: visible; }
-  
-  .modal-window { 
-    background: #fff; width: 100%; max-width: 850px; height: 85vh; 
-    border-radius: 32px; overflow: hidden; display: flex; flex-direction: column;
-    animation: slideUp 0.3s ease-out;
-  }
-  .modal-window {
-    background: white;
-    width: 100%;
-    max-width: 900px;
-    height: 100vh;
-    box-shadow: 0 50px 100px -20px rgba(0,0,0,0.15);
-    transform: translateY(100%);
-    transition: transform 0.5s cubic-bezier(0.16, 1, 0.3, 1);
-    display: flex;
-    flex-direction: column;
-    overflow: hidden;
-  }
-
-  .modal-backdrop.open .modal-window {
-    transform: translateY(0);
-  }
-
-  @keyframes modalSlideUp {
-    from { transform: translateY(40px); opacity: 0; }
-    to { transform: translateY(0); opacity: 1; }
-  }
-
-  .modal-body {
-    padding: 60px 80px;
-    overflow-y: auto;
-    font-size: 1.1rem;
-    line-height: 1.8;
-    color: #334155;
-  }
-
-  /* Styling Markdown content inside the modal */
-  .modal-body :global(h2) {
-    font-size: 2rem;
-    font-weight: 900;
-    color: #0f172a;
-    margin: 40px 0 20px;
-  }
-
-  .modal-body :global(blockquote) {
-    border-left: 4px solid #3b82f6;
-    background: #f8fafc;
-    padding: 24px 32px;
-    margin: 32px 0;
-    border-radius: 0 16px 16px 0;
-    font-style: italic;
-    color: #1e40af;
-  }
-
-  .modal-body :global(ul) {
-    list-style: none;
-    padding: 0;
-  }
-
-  .modal-body :global(li) {
-    position: relative;
-    padding-left: 28px;
-    margin-bottom: 12px;
-  }
-
-  .modal-body :global(li::before) {
-    content: "→";
-    position: absolute;
-    left: 0;
-    color: #3b82f6;
-    font-weight: 900;
-  }
-
-  /* Header Navigation */
-  .modal-header {
-    padding: 20px 40px;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    border-bottom: 1px solid #f1f5f9;
-    background: rgba(255,255,255,0.7);
-    backdrop-filter: blur(10px);
-    z-index: 10;
-  }
-
-  .accent-pill {
-    background: #2563eb;
-    color: white;
-    font-size: 0.65rem;
-    font-weight: 800;
-    padding: 4px 10px;
-    border-radius: 4px;
-    text-transform: uppercase;
-    margin-right: 12px;
-  }
-
-  /* Reading Typography */
-  .modal-body-wrapper {
-    flex: 1;
-    overflow-y: auto;
-    padding: 60px 40px;
-    scroll-behavior: smooth;
-  }
-
-  .reading-container {
-    max-width: 680px;
-    margin: 0 auto;
-  }
-
-  .reading-title {
-    font-size: 3rem;
-    font-weight: 800;
-    color: #0f172a;
-    line-height: 1.1;
-    letter-spacing: -0.04em;
-    margin-bottom: 24px;
-  }
-
-  .article-meta {
-    color: #64748b;
-    font-size: 0.9rem;
-    font-weight: 500;
-    margin-bottom: 48px;
-    display: flex;
-    align-items: center;
-    gap: 10px;
-  }
-
-  .prose-content {
-    font-size: 1.25rem;
-    line-height: 1.8;
-    color: #334155;
-    font-family: 'Inter', system-ui, sans-serif;
-  }
-
-  /* Call to Action */
-  .article-footer-cta {
-    margin-top: 80px;
-    padding: 40px;
-    background: #f8fafc;
-    border-radius: 24px;
-    text-align: center;
-    border: 1px solid #e2e8f0;
-  }
-
-  .primary-button {
-    display: inline-flex;
-    align-items: center;
-    gap: 12px;
-    background: #0f172a;
-    color: white;
-    padding: 16px 32px;
-    border-radius: 100px;
-    font-weight: 700;
-    text-decoration: none;
-    transition: transform 0.2s ease;
-    margin-top: 16px;
-  }
-
-  .primary-button:hover {
-    transform: scale(1.05);
-    background: #2563eb;
-  }
-
-  @keyframes slideUp {
-    from { transform: translateY(20px); opacity: 0; }
-    to { transform: translateY(0); opacity: 1; }
-  }
-
-  .modal-nav { padding: 20px 40px; border-bottom: 1px solid #f1f5f9; display: flex; justify-content: space-between; align-items: center; }
-  #close-modal { font-size: 2.5rem; border: none; background: none; cursor: pointer; color: #64748b; }
-
-  .modal-body { padding: 60px 80px; overflow-y: auto; line-height: 1.8; color: #334155; }
-
-  /* Injected Content Styles */
-  .modal-body :global(h1) { font-size: 3rem; font-weight: 900; color: #0f172a; margin-bottom: 24px; }
-  .modal-body :global(h2) { font-size: 1.8rem; margin-top: 40px; color: #0f172a; font-weight: 800; }
-  .modal-body :global(blockquote) { border-left: 4px solid #2563eb; padding-left: 24px; font-style: italic; margin: 40px 0; color: #1e40af; background: #f8fbff; padding: 20px 30px; border-radius: 0 12px 12px 0; }
-
-  /* Loader */
-  .spinner { width: 40px; height: 40px; border: 4px solid #f3f3f3; border-top: 4px solid #2563eb; border-radius: 50%; animation: spin 1s linear infinite; margin: 0 auto 20px; }
-  @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
-  .loading-state { text-align: center; margin-top: 100px; color: #64748b; font-weight: 600; }
-
-  .card-meta {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 20px;
-  }
-
-  .tag-badge {
-    background: #eff6ff;
-    color: #2563eb;
-    font-size: 0.75rem;
-    font-weight: 700;
-    padding: 6px 14px;
-    border-radius: 100px;
-    text-transform: uppercase;
-    letter-spacing: 0.02em;
-  }
-
-  .reading-time {
-    display: flex;
-    align-items: center;
-    gap: 6px;
-    font-size: 0.8rem;
-    color: #94a3b8;
-    font-weight: 500;
-  }
-
-  h3 {
-    font-size: 1.5rem;
-    font-weight: 800;
-    color: #0f172a;
-    line-height: 1.25;
-    margin-bottom: 12px;
-    letter-spacing: -0.02em;
-  }
-
-  p {
-    color: #64748b;
-    font-size: 1rem;
-    line-height: 1.6;
-    margin-bottom: 24px;
-    display: -webkit-box;
-    -webkit-line-clamp: 3; /* Clips text after 3 lines */
-    -webkit-box-orient: vertical;
-    overflow: hidden;
-  }
-
-  .card-footer {
-    margin-top: auto;
-    padding-top: 20px;
-    border-top: 1px solid #f1f5f9;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-  }
-
-  .issue-date {
-    font-size: 0.85rem;
-    color: #94a3b8;
-    font-weight: 500;
-  }
-
-  .excerpt {
-    font-size: 0.9rem;
-    color: #64748b;
-    line-height: 1.5;
-    display: -webkit-box;
-    -webkit-line-clamp: 3; /* Clips long excerpts at 3 lines */
-    -webkit-box-orient: vertical;
-    overflow: hidden;
-  }
-
-  .cta-text {
-    font-size: 0.9rem;
-    font-weight: 700;
-    color: #2563eb;
-    display: flex;
-    align-items: center;
-    gap: 6px;
-    opacity: 0;
-    transform: translateX(-10px);
-    transition: all 0.3s ease;
-  }
-  /* Grid Layout */
-  .grid {
-   display: grid;
-    /* Changed minmax from 350px to 300px to allow 3-column fit */
-    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-    gap: 1.5rem; /* Slightly tighter gap for 3-column balance */
-    padding: 2rem 0;
-  }
-
-  /* Card Container */
-  .issue-card-trigger {
-    display: flex;
-    flex-direction: column;
-    justify-content: flex-start;
-    min-height: 280px; /* Uniform height */
-    padding: 24px;
-    background: white;
-    border-radius: 24px;
-    border: 1px solid #e2e8f0;
-    transition: all 0.3s ease;
-  }
-
-  /* Body Content */
-  .card-body {
-    margin-top: 16px;
-    flex-grow: 1; /* This pushes the footer down */
-  }
-
-  /* Hover State: Elevation & Glow */
-  .issue-card-trigger:hover {
-    transform: translateY(-8px);
-    border-color: #3b82f6;
-    box-shadow: 0 20px 25px -10px rgba(0, 0, 0, 0.08);
-  }
-
-  /* Meta Styling */
-  .card-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 16px;
-  }
-
-  .category-pill {
-    background: #eff6ff;
-    color: #2563eb;
-    font-size: 0.65rem; /* Scaled down for 3-column fit */
-    font-weight: 800;
-    padding: 4px 10px;
-    border-radius: 99px;
-    letter-spacing: 0.05em;
-    text-transform: uppercase;
-  }
-
-  .read-stats {
-    display: flex;
-    align-items: center;
-    gap: 4px;
-    font-size: 0.7rem;
-    color: #94a3b8;
-    font-weight: 600;
-  }
-
-  /* Typography */
-  h3 {
-   font-size: 1.25rem;
-    font-weight: 800;
-    line-height: 1.3;
-    color: #0f172a;
-    margin-bottom: 8px;
-  }
-
-  p {
-    color: #64748b;
-    font-size: 0.9rem;
-    line-height: 1.5;
-    margin-bottom: 20px;
-    /* Strict 3-line limit to keep grid tidy */
-    display: -webkit-box;
-    -webkit-line-clamp: 3;
-    -webkit-box-orient: vertical;
-    overflow: hidden;
-  }
-
-  /* Footer & Animation */
-  .card-footer {
-    margin-top: 24px;
-    padding-top: 16px;
-    border-top: 1px solid #f1f5f9;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-  }
-
-  .footer-left {
-    display: flex;
-    flex-direction: column;
-    gap: 4px;
-  }
-
-  .post-date {
-    font-size: 0.75rem;
-    color: #94a3b8;
-    font-weight: 500;
-  }
-
-  .view-action {
-    display: flex;
-    align-items: center;
-    gap: 6px;
-    color: #2563eb;
-    font-weight: 700;
-    font-size: 0.8rem;
-    transition: transform 0.3s ease;
-  }
-
-  .issue-card-trigger:hover .view-action {
-    transform: translateX(4px);
-  }
-
-  .issue-card-trigger:hover .cta-text {
-    opacity: 1;
-    transform: translateX(0);
-  }
-  .nav-actions { display: flex; align-items: center; gap: 15px; }
-
-.share-trigger {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  background: #f1f5f9;
-  border: none;
-  padding: 8px 16px;
-  border-radius: 99px;
-  color: #0f172a;
-  font-weight: 700;
-  font-size: 0.85rem;
-  cursor: pointer;
-  transition: all 0.2s ease;
-}
-
-.share-trigger:hover { background: #e2e8f0; transform: translateY(-1px); }
-
-.share-dropdown {
-  position: absolute;
-  top: 70px;
-  right: 80px;
-  background: white;
-  border: 1px solid #e2e8f0;
-  border-radius: 12px;
-  box-shadow: 0 10px 25px rgba(0,0,0,0.1);
-  display: none;
-  flex-direction: column;
-  z-index: 1001;
-  overflow: hidden;
-}
-
-.share-dropdown.active { display: flex; }
-
-.share-dropdown button {
-  padding: 12px 20px;
-  border: none;
-  background: none;
-  text-align: left;
-  font-weight: 600;
-  cursor: pointer;
-  font-size: 0.9rem;
-}
-
-.share-dropdown button:hover { background: #f8fafc; color: #3b82f6; }
-
-.live-count {
-    font-size: 0.7rem;
-    font-weight: 700;
-    color: #3b82f6;
-    display: flex;
-    align-items: center;
-    gap: 4px;
-  }
-
-</style>
-
-<script>
-  import { supabase } from '../lib/supabase';
-  let activeSlug = ''; // Variable to track which issue is open
-  // 1. DECLARE AT THE TOP (Global Scope)
-  let currentSharedSlug = '';
-  const modal = document.getElementById('reader-modal');
-  const modalContent = document.getElementById('modal-content-area');
-  const closeBtn = document.getElementById('close-modal');
-  const triggers = document.querySelectorAll('.issue-card-trigger');
-  
-  // --- 1. TRACK PAGE VISIT ---
-  async function trackPageVisit(path) {
-    console.log("System Check: Tracking visit for", path);
-    const { error } = await supabase.rpc('increment_visit', { page_url: path });
-    if (error) console.error("Tracking Error:", error.message);
-  }
-
-  // Track the archive page itself on load
-  trackPageVisit(window.location.pathname);
-
-  // --- 2. MODAL & INDIVIDUAL ISSUE TRACKING ---
-  triggers.forEach(trigger => {
-    trigger.addEventListener('click', async () => {
-      const isExternal = trigger.getAttribute('data-is-external') === "true";
-      const title = trigger.getAttribute('data-title');
-      const summary = trigger.getAttribute('data-summary');
-      const externalUrl = trigger.getAttribute('data-url');
-      const tag = trigger.getAttribute('data-tag');
-      const date = trigger.getAttribute('data-date'); // Ensure you have this attr
-      currentSharedSlug = trigger.getAttribute('data-slug');
-      // 2. Select the title element in the modal
-      const mTitle = document.getElementById('modal-title');
-      const mDate = document.getElementById('modal-date');
-      // 3. Inject the real title
-      if (mTitle) mTitle.innerText = title;
-      if (mDate) mDate.innerText = date;
-
-      if (!modal || !modalContent) return;
-
-      // 1. Open Modal and show loading
-      modal.classList.add('open');
-      document.body.style.overflow = 'hidden';
-      
-      const fullArticleBtn = document.getElementById('full-article-btn');
-      const modalTag = document.getElementById('modal-tag');
-
-      if (isExternal) {
-// 1. Define the tracking path for external items
-        // We use the slug (URL) as the unique identifier for the visit
-        const path = `/pulse/${currentSharedSlug}`;
-        
-        // 2. TRIGGER THE VIEW COUNT INCREASE
-        trackPageVisit(path);
-
-        // 3. Populate Modal Content
-        modalContent.innerHTML = `
-          <div style="font-size: 1.25rem; line-height: 1.8; color: #334155;">
-            <p>${summary}</p>
-          </div>
-          <blockquote style="margin-top: 40px; border-left: 4px solid #2563eb; padding: 20px; background: #f8fbff;">
-            This insight was summarized by Agentic Pulse. Click the button below to view the original source.
-          </blockquote>
-        `;
-        if (fullArticleBtn) {
-          fullArticleBtn.href = externalUrl;
-          fullArticleBtn.classList.remove('hidden');
+        </Layout>
+
+        <style>
+          /* Basic Styles */
+          .archive-main { padding-top: 80px; min-height: 100vh; font-family: 'Inter', sans-serif; }
+          .container { max-width: 1100px; margin: 0 auto; padding: 0 20px; }
+          
+          .archive-hero { background: #0f172a; padding: 80px 0; color: white; text-align: center; }
+          .archive-hero h1 { font-size: 3rem; font-weight: 900; letter-spacing: -0.04em; }
+          
+          
+          .tag { background: #eff6ff; color: #2563eb; font-size: 0.7rem; font-weight: 700; padding: 4px 10px; border-radius: 99px; text-transform: uppercase; }
+          .read-time { font-size: 0.75rem; color: #94a3b8; font-weight: 600; }
+          h3 { font-size: 1.4rem; font-weight: 800; margin: 15px 0 10px; color: #0f172a; }
+          
+          .nav-actions {
+          display: flex;
+          align-items: center;
+          gap: 12px;
+          }
+        .share-trigger {
+          background: #eff6ff; /* Light blue background */
+          color: #2563eb;      /* Bright blue text */
+          border: none;
+          padding: 6px 14px;
+          border-radius: 99px;
+          display: flex;
+          align-items: center;
+          gap: 8px;
+          font-weight: 700;
+          cursor: pointer;
         }
-        if (modalTag) modalTag.innerText = tag;
-        
-      } else {
-        // --- LOGIC FOR LOCAL MARKDOWN ITEMS ---
-        modalContent.innerHTML = '<div class="loading-state"><div class="spinner"></div><p>Accessing the Pulse...</p></div>';
-        if (fullArticleBtn) fullArticleBtn.classList.add('hidden');
-        
-        const path = `/pulse/${currentSharedSlug}`;
-        trackPageVisit(path);
+          /* Modal Animation & Layout */
+          .modal-backdrop { 
+            position: fixed;
+            inset: 0;
+            background: rgba(255, 255, 255, 0.8);
+            backdrop-filter: blur(12px) saturate(180%);
+            z-index: 1000;
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+            display: flex;
+            justify-content: center;
+          }
+          .modal-backdrop.open { opacity: 1;
+            visibility: visible; }
+          
+          .modal-window { 
+            background: #fff; width: 100%; max-width: 850px; height: 85vh; 
+            border-radius: 32px; overflow: hidden; display: flex; flex-direction: column;
+            animation: slideUp 0.3s ease-out;
+          }
+          .modal-window {
+            background: white;
+            width: 100%;
+            max-width: 900px;
+            height: 100vh;
+            box-shadow: 0 50px 100px -20px rgba(0,0,0,0.15);
+            transform: translateY(100%);
+            transition: transform 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+          }
 
-        try {
-          const res = await fetch(path);
-          const html = await res.text();
-          const parser = new DOMParser();
-          const doc = parser.parseFromString(html, 'text/html');
-          const extractedContent = doc.querySelector('.content') || doc.querySelector('main') || doc.querySelector('article') || doc.body;
-          if (extractedContent) modalContent.innerHTML = extractedContent.innerHTML;
-        } catch (err) {
-          modalContent.innerHTML = '<p>Error loading content.</p>';
+          .modal-backdrop.open .modal-window {
+            transform: translateY(0);
+          }
+
+          @keyframes modalSlideUp {
+            from { transform: translateY(40px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+          }
+
+          .modal-body {
+            padding: 60px 80px;
+            overflow-y: auto;
+            font-size: 1.1rem;
+            line-height: 1.8;
+            color: #334155;
+          }
+
+          /* Styling Markdown content inside the modal */
+          .modal-body :global(h2) {
+            font-size: 2rem;
+            font-weight: 900;
+            color: #0f172a;
+            margin: 40px 0 20px;
+          }
+
+          .modal-body :global(blockquote) {
+            border-left: 4px solid #3b82f6;
+            background: #f8fafc;
+            padding: 24px 32px;
+            margin: 32px 0;
+            border-radius: 0 16px 16px 0;
+            font-style: italic;
+            color: #1e40af;
+          }
+
+          .modal-body :global(ul) {
+            list-style: none;
+            padding: 0;
+          }
+
+          .modal-body :global(li) {
+            position: relative;
+            padding-left: 28px;
+            margin-bottom: 12px;
+          }
+
+          .modal-body :global(li::before) {
+            content: "→";
+            position: absolute;
+            left: 0;
+            color: #3b82f6;
+            font-weight: 900;
+          }
+
+          /* Header Navigation */
+          .modal-header {
+            padding: 20px 40px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid #f1f5f9;
+            background: rgba(255,255,255,0.7);
+            backdrop-filter: blur(10px);
+            z-index: 10;
+          }
+
+          .accent-pill {
+            background: #2563eb;
+            color: white;
+            font-size: 0.65rem;
+            font-weight: 800;
+            padding: 4px 10px;
+            border-radius: 4px;
+            text-transform: uppercase;
+            margin-right: 12px;
+          }
+
+          /* Reading Typography */
+          .modal-body-wrapper {
+            flex: 1;
+            overflow-y: auto;
+            padding: 60px 40px;
+            scroll-behavior: smooth;
+          }
+
+          .reading-container {
+            max-width: 680px;
+            margin: 0 auto;
+          }
+
+          .reading-title {
+            font-size: 3rem;
+            font-weight: 800;
+            color: #0f172a;
+            line-height: 1.1;
+            letter-spacing: -0.04em;
+            margin-bottom: 24px;
+          }
+
+          .article-meta {
+            color: #64748b;
+            font-size: 0.9rem;
+            font-weight: 500;
+            margin-bottom: 48px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+          }
+
+          .prose-content {
+            font-size: 1.25rem;
+            line-height: 1.8;
+            color: #334155;
+            font-family: 'Inter', system-ui, sans-serif;
+          }
+
+          /* Call to Action */
+          .article-footer-cta {
+            margin-top: 80px;
+            padding: 40px;
+            background: #f8fafc;
+            border-radius: 24px;
+            text-align: center;
+            border: 1px solid #e2e8f0;
+          }
+
+          .primary-button {
+            display: inline-flex;
+            align-items: center;
+            gap: 12px;
+            background: #0f172a;
+            color: white;
+            padding: 16px 32px;
+            border-radius: 100px;
+            font-weight: 700;
+            text-decoration: none;
+            transition: transform 0.2s ease;
+            margin-top: 16px;
+          }
+
+          .primary-button:hover {
+            transform: scale(1.05);
+            background: #2563eb;
+          }
+
+          @keyframes slideUp {
+            from { transform: translateY(20px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+          }
+
+          .modal-nav { padding: 20px 40px; border-bottom: 1px solid #f1f5f9; display: flex; justify-content: space-between; align-items: center; }
+          #close-modal { font-size: 2.5rem; border: none; background: none; cursor: pointer; color: #64748b; }
+
+          .modal-body { padding: 60px 80px; overflow-y: auto; line-height: 1.8; color: #334155; }
+
+          /* Injected Content Styles */
+          .modal-body :global(h1) { font-size: 3rem; font-weight: 900; color: #0f172a; margin-bottom: 24px; }
+          .modal-body :global(h2) { font-size: 1.8rem; margin-top: 40px; color: #0f172a; font-weight: 800; }
+          .modal-body :global(blockquote) { border-left: 4px solid #2563eb; padding-left: 24px; font-style: italic; margin: 40px 0; color: #1e40af; background: #f8fbff; padding: 20px 30px; border-radius: 0 12px 12px 0; }
+
+          /* Loader */
+          .spinner { width: 40px; height: 40px; border: 4px solid #f3f3f3; border-top: 4px solid #2563eb; border-radius: 50%; animation: spin 1s linear infinite; margin: 0 auto 20px; }
+          @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+          .loading-state { text-align: center; margin-top: 100px; color: #64748b; font-weight: 600; }
+
+          .card-meta {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+          }
+
+          .tag-badge {
+            background: #eff6ff;
+            color: #2563eb;
+            font-size: 0.75rem;
+            font-weight: 700;
+            padding: 6px 14px;
+            border-radius: 100px;
+            text-transform: uppercase;
+            letter-spacing: 0.02em;
+          }
+
+          .reading-time {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 0.8rem;
+            color: #94a3b8;
+            font-weight: 500;
+          }
+
+          h3 {
+            font-size: 1.5rem;
+            font-weight: 800;
+            color: #0f172a;
+            line-height: 1.25;
+            margin-bottom: 12px;
+            letter-spacing: -0.02em;
+          }
+
+          p {
+            color: #64748b;
+            font-size: 1rem;
+            line-height: 1.6;
+            margin-bottom: 24px;
+            display: -webkit-box;
+            -webkit-line-clamp: 3; /* Clips text after 3 lines */
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+          }
+
+          .card-footer {
+            margin-top: auto;
+            padding-top: 20px;
+            border-top: 1px solid #f1f5f9;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+          }
+
+          .issue-date {
+            font-size: 0.85rem;
+            color: #94a3b8;
+            font-weight: 500;
+          }
+
+          .excerpt {
+            font-size: 0.9rem;
+            color: #64748b;
+            line-height: 1.5;
+            display: -webkit-box;
+            -webkit-line-clamp: 3; /* Clips long excerpts at 3 lines */
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+          }
+
+          .cta-text {
+            font-size: 0.9rem;
+            font-weight: 700;
+            color: #2563eb;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            opacity: 0;
+            transform: translateX(-10px);
+            transition: all 0.3s ease;
+          }
+          /* Grid Layout */
+          .grid {
+          display: grid;
+            /* Changed minmax from 350px to 300px to allow 3-column fit */
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 1.5rem; /* Slightly tighter gap for 3-column balance */
+            padding: 2rem 0;
+          }
+
+          /* Card Container */
+          .issue-card-trigger {
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-start;
+            min-height: 280px; /* Uniform height */
+            padding: 24px;
+            background: white;
+            border-radius: 24px;
+            border: 1px solid #e2e8f0;
+            transition: all 0.3s ease;
+          }
+
+          /* Body Content */
+          .card-body {
+            margin-top: 16px;
+            flex-grow: 1; /* This pushes the footer down */
+          }
+
+          /* Hover State: Elevation & Glow */
+          .issue-card-trigger:hover {
+            transform: translateY(-8px);
+            border-color: #3b82f6;
+            box-shadow: 0 20px 25px -10px rgba(0, 0, 0, 0.08);
+          }
+
+          /* Meta Styling */
+          .card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 16px;
+          }
+
+          .category-pill {
+            background: #eff6ff;
+            color: #2563eb;
+            font-size: 0.65rem; /* Scaled down for 3-column fit */
+            font-weight: 800;
+            padding: 4px 10px;
+            border-radius: 99px;
+            letter-spacing: 0.05em;
+            text-transform: uppercase;
+          }
+
+          .read-stats {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            font-size: 0.7rem;
+            color: #94a3b8;
+            font-weight: 600;
+          }
+
+          /* Typography */
+          h3 {
+          font-size: 1.25rem;
+            font-weight: 800;
+            line-height: 1.3;
+            color: #0f172a;
+            margin-bottom: 8px;
+          }
+
+          p {
+            color: #64748b;
+            font-size: 0.9rem;
+            line-height: 1.5;
+            margin-bottom: 20px;
+            /* Strict 3-line limit to keep grid tidy */
+            display: -webkit-box;
+            -webkit-line-clamp: 3;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+          }
+
+          /* Footer & Animation */
+          .card-footer {
+            margin-top: 24px;
+            padding-top: 16px;
+            border-top: 1px solid #f1f5f9;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+          }
+
+          .footer-left {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+          }
+
+          .post-date {
+            font-size: 0.75rem;
+            color: #94a3b8;
+            font-weight: 500;
+          }
+
+          .view-action {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            color: #2563eb;
+            font-weight: 700;
+            font-size: 0.8rem;
+            transition: transform 0.3s ease;
+          }
+
+          .issue-card-trigger:hover .view-action {
+            transform: translateX(4px);
+          }
+
+          .issue-card-trigger:hover .cta-text {
+            opacity: 1;
+            transform: translateX(0);
+          }
+          .nav-actions { display: flex; align-items: center; gap: 15px; }
+
+        .share-trigger {
+          display: flex;
+          align-items: center;
+          gap: 8px;
+          background: #f1f5f9;
+          border: none;
+          padding: 8px 16px;
+          border-radius: 99px;
+          color: #0f172a;
+          font-weight: 700;
+          font-size: 0.85rem;
+          cursor: pointer;
+          transition: all 0.2s ease;
         }
+
+        .share-trigger:hover { background: #e2e8f0; transform: translateY(-1px); }
+
+        .share-dropdown {
+          position: absolute;
+          top: 70px;
+          right: 80px;
+          background: white;
+          border: 1px solid #e2e8f0;
+          border-radius: 12px;
+          box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+          display: none;
+          flex-direction: column;
+          z-index: 1001;
+          overflow: hidden;
+        }
+
+        .share-dropdown.active { display: flex; }
+
+        .share-dropdown button {
+          padding: 12px 20px;
+          border: none;
+          background: none;
+          text-align: left;
+          font-weight: 600;
+          cursor: pointer;
+          font-size: 0.9rem;
+        }
+
+        .share-dropdown button:hover { background: #f8fafc; color: #3b82f6; }
+
+        .live-count {
+            font-size: 0.7rem;
+            font-weight: 700;
+            color: #3b82f6;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+          }
+
+        .reading-progress-container {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 4px;
+            background: #f1f5f9;
+            z-index: 20;
+          }
+
+          .progress-fill {
+            height: 100%;
+            width: 0%; /* Managed by JS */
+            background: #2563eb;
+            transition: width 0.1s ease-out;
+            box-shadow: 0 0 8px rgba(37, 99, 235, 0.4);
+          }
+
+          /* Optional: Smooth fade for the prose content now that headers are gone */
+          .prose-content p {
+            margin-bottom: 1.5rem;
+            opacity: 0.9;
+          }
+
+          .pulse-container {
+            display: grid;
+            grid-template-columns: 280px 1fr; /* Slightly wider sidebar for readability */
+            gap: 3rem;
+            align-items: start;
+            margin-top: 40px;
+          }
+
+          .pulse-sidebar {
+            position: sticky;
+            top: 100px; /* Fixed height from top navigation */
+            height: calc(100vh - 120px);
+            overflow-y: auto;
+            padding-right: 1.5rem;
+            border-right: 1px solid #f1f5f9;
+          }
+
+          /* Hide scrollbar for sidebar while allowing scroll */
+          .pulse-sidebar::-webkit-scrollbar {
+            width: 4px;
+          }
+          .pulse-sidebar::-webkit-scrollbar-thumb {
+            background: #e2e8f0;
+            border-radius: 10px;
+          }
+
+          /* Sticky Month Headers in the main feed */
+          .sticky-month-label {
+            position: sticky;
+            top: 0;
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(8px);
+            padding: 1.5rem 0;
+            z-index: 20;
+            font-size: 2.2rem;
+            font-weight: 900;
+            border-bottom: 2px solid #f1f5f9;
+            margin-bottom: 2rem;
+            color: #0f172a;
+          }
+
+          .toc-header {
+            font-size: 0.7rem;
+            font-weight: 800;
+            text-transform: uppercase;
+            color: #94a3b8;
+            letter-spacing: 0.1em;
+            margin-bottom: 1.5rem;
+          }
+
+          .toc-month-link {
+            display: block;
+            font-size: 0.9rem;
+            font-weight: 700;
+            color: #0f172a;
+            text-decoration: none;
+            margin-bottom: 0.5rem;
+          }
+
+          .toc-week-list {
+            list-style: none;
+            padding-left: 1rem;
+            margin-bottom: 1.5rem;
+            border-left: 1px solid #e2e8f0;
+          }
+
+          .toc-week-link {
+            display: block;
+            font-size: 0.8rem;
+            color: #64748b;
+            text-decoration: none;
+            padding: 4px 0;
+            transition: color 0.2s;
+          }
+
+          .toc-week-link:hover {
+            color: #2563eb;
+          }
+
+          /* Visual Markers */
+          .sticky-month-label {
+            position: sticky;
+            top: 0;
+            background: rgba(255, 255, 255, 0.9);
+            backdrop-filter: blur(8px);
+            padding: 1rem 0;
+            z-index: 10;
+            font-size: 2rem;
+            font-weight: 800;
+            border-bottom: 1px solid #f1f5f9;
+            margin-bottom: 2rem;
+          }
+
+          /* Adjusted Grid for ToC layout */
+        .card-grid {
+          display: grid;
+          grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); 
+          gap: 1.5rem;
+          margin-bottom: 4rem;
+        }
+
+        /* Refined Card Proportions */
+        .issue-card-trigger {
+          display: flex;
+          flex-direction: column;
+          background: white;
+          border-radius: 20px;
+          border: 1px solid #e2e8f0;
+          padding: 20px;
+          height: 100%; /* Ensure cards in a row are same height */
+          transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); 
+        }
+
+        .issue-card-trigger:hover {
+          border-color: #2563eb;
+          box-shadow: 0 12px 20px -5px rgba(0, 0, 0, 0.05);
+          transform: translateY(-4px);
+        }
+
+        /* Typography scale for narrower columns */
+        .card-body h3 {
+          font-size: 1.2rem;
+          line-height: 1.4;
+          margin-bottom: 12px;
+          color: #0f172a; 
+        }
+
+        .excerpt {
+          font-size: 0.9rem;
+          color: #64748b;
+          line-height: 1.6;
+          display: -webkit-box;
+          -webkit-line-clamp: 3; /* Keeps feed neat */
+          -webkit-box-orient: vertical;
+          overflow: hidden; 
+        }
+
+        .week-block {
+          margin-bottom: 3rem;
+        }
+
+        .week-sublabel {
+          font-size: 0.85rem;
+          font-weight: 700;
+          text-transform: uppercase;
+          color: #64748b;
+          letter-spacing: 0.05em;
+          margin-bottom: 1.5rem;
+          display: flex;
+          align-items: center;
+          gap: 10px;
+        }
+
+        .week-sublabel::after {
+          content: "";
+          flex: 1;
+          height: 1px;
+          background: #f1f5f9;
+        }
+
+        /* Ensure the grid doesn't overflow the main content area */
+        .pulse-main .grid {
+          padding: 0;
+          margin-bottom: 2rem;
+        }
+
+        /* Sidebar Highlight Styles */
+        .toc-month-link.active {
+          color: #2563eb !important; /* Your accent blue */
+          font-weight: 800;
+        }
+
+        .toc-week-link.active {
+          color: #2563eb !important;
+          border-left: 2px solid #2563eb;
+          padding-left: 12px !important;
+          margin-left: -13px; /* Offset the border so it aligns with the list line */
+        }
+
+        /* Optional: Smooth scrolling for the whole page */
+        html {
+          scroll-behavior: smooth;
+        }
+
+        .week-block {
+        margin-bottom: 5rem;
+        scroll-margin-top: 120px; /* Ensures the title isn't hidden by nav when jumping */
       }
-    });
-  });
 
-  // Logic for the Modal Share Button
-const modalShareBtn = document.getElementById('modal-share-btn');
-modalShareBtn?.addEventListener('click', () => {
-  const shareUrl = `${window.location.origin}/pulse/${currentSharedSlug}`;
-  
-  if (navigator.share) {
-    navigator.share({
-      title: 'Agentic Pulse Insight',
-      url: shareUrl
-    });
-  } else {
-    navigator.clipboard.writeText(shareUrl);
-    alert("Link copied to clipboard!");
-  }
-});
+      .week-sublabel {
+        font-size: 0.9rem;
+        font-weight: 700;
+        color: #64748b;
+        text-transform: uppercase;
+        letter-spacing: 0.1em;
+        margin-bottom: 2rem;
+        display: flex;
+        align-items: center;
+        gap: 15px;
+      }
 
-  // --- 3. LOAD LIVE VIEW COUNTS ---
-  async function loadCounts() {
-    const { data, error } = await supabase.from('site_visits').select('page_path, visit_count');
-    if (error) return console.error("Load Counts Error:", error.message);
+      .week-sublabel::after {
+        content: "";
+        flex: 1;
+        height: 1px;
+        background: #e2e8f0;
+      }
 
-    document.querySelectorAll('.live-count').forEach(badge => {
-      const path = badge.getAttribute('data-path');
-      const record = data?.find(r => r.page_path === path);
-      console.log(`Checking path: ${path} | Found: ${record?.visit_count || 'None'}`);
-      const span = badge.querySelector('.count-number');
-      if (span) span.innerText = record ? record.visit_count : '0';
-    });
-  }
+      /* Back to Top Button */
+      .back-to-top {
+        position: fixed;
+        bottom: 30px;
+        right: 30px;
+        width: 50px;
+        height: 50px;
+        border-radius: 50%;
+        background: #0f172a;
+        color: white;
+        border: none;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        opacity: 0;
+        visibility: hidden;
+        transition: all 0.3s ease;
+        z-index: 100;
+        box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+      }
 
-  // Close modal logic
-  closeBtn?.addEventListener('click', () => {
-    modal?.classList.remove('open');
-    document.body.style.overflow = '';
-    loadCounts(); // Refresh counts when closing
-  });
+      .back-to-top.visible {
+        opacity: 1;
+        visibility: visible;
+      }
 
-  // Initial load
-  loadCounts();
+      .back-to-top:hover {
+        background: #2563eb;
+        transform: translateY(-5px);
+      }
+        </style>
 
-  // Share Menu Toggle
-const shareBtn = document.getElementById('share-btn');
-const shareMenu = document.getElementById('share-menu');
+        <script>
+          import { supabase } from '../lib/supabase';
+          let activeSlug = ''; // Variable to track which issue is open
+          // 1. DECLARE AT THE TOP (Global Scope)
+          let currentSharedSlug = '';
+          const modal = document.getElementById('reader-modal');
+          const modalContent = document.getElementById('modal-content-area');
+          const closeBtn = document.getElementById('close-modal');
+          const triggers = document.querySelectorAll('.issue-card-trigger');
+          const modalBody = document.querySelector('.modal-body-wrapper');
+          const progressBar = document.getElementById('reading-progress-bar');
 
-shareBtn?.addEventListener('click', (e) => {
-  e.stopPropagation();
-  shareMenu?.classList.toggle('active');
-});
+        if (modalBody && progressBar) {
+          modalBody.addEventListener('scroll', () => {
+            const totalHeight = modalBody.scrollHeight - modalBody.clientHeight;
+            const scrollPosition = modalBody.scrollTop;
+            
+            if (totalHeight > 0) {
+              const percentage = (scrollPosition / totalHeight) * 100;
+              progressBar.style.width = `${percentage}%`;
+            }
+          });
+        }
 
-// Sharing Logic
-window.shareTo = (platform) => {
-  const url = encodeURIComponent(`${window.location.origin}/pulse/${currentSharedSlug}`);
-  const text = encodeURIComponent("Check out this Agentic AI insight from the Pulse Archive!");
-  
-  const links = {
-    x: `https://x.com/intent/tweet?text=${text}&url=${url}`,
-    linkedin: `https://www.linkedin.com/sharing/share-offsite/?url=${url}`
-  };
-  
-  window.open(links[platform], '_blank');
-  shareMenu?.classList.remove('active');
-};
+        // Reset progress bar when modal is closed
+        closeBtn.addEventListener('click', () => {
+          setTimeout(() => {
+            progressBar.style.width = '0%';
+          }, 400); // Wait for fade-out animation
+        });
 
-window.copyLink = () => {
-  const fullUrl = `${window.location.origin}/pulse/${currentSharedSlug}`;
-  navigator.clipboard.writeText(fullUrl);
-  alert("Link copied to clipboard!");
-  shareMenu?.classList.remove('active');
-};
+          // --- 1. TRACK PAGE VISIT ---
+          async function trackPageVisit(path) {
+            console.log("System Check: Tracking visit for", path);
+            const { error } = await supabase.rpc('increment_visit', { page_url: path });
+            if (error) console.error("Tracking Error:", error.message);
+          }
 
-// Close menu if clicking outside
-document.addEventListener('click', () => shareMenu?.classList.remove('active'));
-</script>
+          // Track the archive page itself on load
+          trackPageVisit(window.location.pathname);
+
+          // --- 2. MODAL & INDIVIDUAL ISSUE TRACKING ---
+          triggers.forEach(trigger => {
+            trigger.addEventListener('click', async () => {
+              const isExternal = trigger.getAttribute('data-is-external') === "true";
+              const title = trigger.getAttribute('data-title');
+              const summary = trigger.getAttribute('data-summary');
+              const externalUrl = trigger.getAttribute('data-url');
+              const tag = trigger.getAttribute('data-tag');
+              const date = trigger.getAttribute('data-date'); // Ensure you have this attr
+              currentSharedSlug = trigger.getAttribute('data-slug');
+              // 2. Select the title element in the modal
+              const mTitle = document.getElementById('modal-title');
+              const mDate = document.getElementById('modal-date');
+              // 3. Inject the real title
+              if (mTitle) mTitle.innerText = title;
+              if (mDate) mDate.innerText = date;
+
+              if (!modal || !modalContent) return;
+
+              // 1. Open Modal and show loading
+              modal.classList.add('open');
+              document.body.style.overflow = 'hidden';
+              
+              const fullArticleBtn = document.getElementById('full-article-btn');
+              const modalTag = document.getElementById('modal-tag');
+
+              if (isExternal) {
+        // 1. Define the tracking path for external items
+                // We use the slug (URL) as the unique identifier for the visit
+                const path = `/pulse/${currentSharedSlug}`;
+                
+                // 2. TRIGGER THE VIEW COUNT INCREASE
+                trackPageVisit(path);
+
+                // 3. Populate Modal Content
+                modalContent.innerHTML = `
+                  <div style="font-size: 1.25rem; line-height: 1.8; color: #334155;">
+                    <p>${summary}</p>
+                  </div>
+                  <blockquote style="margin-top: 40px; border-left: 4px solid #2563eb; padding: 20px; background: #f8fbff;">
+                    This insight was summarized by Agentic Pulse. Click the button below to view the original source.
+                  </blockquote>
+                `;
+                if (fullArticleBtn) {
+                  fullArticleBtn.href = externalUrl;
+                  fullArticleBtn.classList.remove('hidden');
+                }
+                if (modalTag) modalTag.innerText = tag;
+                
+              } else {
+                // --- LOGIC FOR LOCAL MARKDOWN ITEMS ---
+                modalContent.innerHTML = '<div class="loading-state"><div class="spinner"></div><p>Accessing the Pulse...</p></div>';
+                if (fullArticleBtn) fullArticleBtn.classList.add('hidden');
+                
+                const path = `/pulse/${currentSharedSlug}`;
+                trackPageVisit(path);
+
+                try {
+                  const res = await fetch(path);
+                  const html = await res.text();
+                  const parser = new DOMParser();
+                  const doc = parser.parseFromString(html, 'text/html');
+                  const extractedContent = doc.querySelector('.content') || doc.querySelector('main') || doc.querySelector('article') || doc.body;
+                  if (extractedContent) modalContent.innerHTML = extractedContent.innerHTML;
+                } catch (err) {
+                  modalContent.innerHTML = '<p>Error loading content.</p>';
+                }
+              }
+            });
+          });
+
+          // Logic for the Modal Share Button
+        const modalShareBtn = document.getElementById('modal-share-btn');
+        modalShareBtn?.addEventListener('click', () => {
+          const shareUrl = `${window.location.origin}/pulse/${currentSharedSlug}`;
+          
+          if (navigator.share) {
+            navigator.share({
+              title: 'Agentic Pulse Insight',
+              url: shareUrl
+            });
+          } else {
+            navigator.clipboard.writeText(shareUrl);
+            alert("Link copied to clipboard!");
+          }
+        });
+
+          // --- 3. LOAD LIVE VIEW COUNTS ---
+          async function loadCounts() {
+            const { data, error } = await supabase.from('site_visits').select('page_path, visit_count');
+            if (error) return console.error("Load Counts Error:", error.message);
+
+            document.querySelectorAll('.live-count').forEach(badge => {
+              const path = badge.getAttribute('data-path');
+              const record = data?.find(r => r.page_path === path);
+              console.log(`Checking path: ${path} | Found: ${record?.visit_count || 'None'}`);
+              const span = badge.querySelector('.count-number');
+              if (span) span.innerText = record ? record.visit_count : '0';
+            });
+          }
+
+          // Close modal logic
+          closeBtn?.addEventListener('click', () => {
+            modal?.classList.remove('open');
+            document.body.style.overflow = '';
+            loadCounts(); // Refresh counts when closing
+          });
+
+          // Initial load
+          loadCounts();
+
+          // Share Menu Toggle
+        const shareBtn = document.getElementById('share-btn');
+        const shareMenu = document.getElementById('share-menu');
+
+        shareBtn?.addEventListener('click', (e) => {
+          e.stopPropagation();
+          shareMenu?.classList.toggle('active');
+        });
+
+        // Sharing Logic
+        window.shareTo = (platform) => {
+          const url = encodeURIComponent(`${window.location.origin}/pulse/${currentSharedSlug}`);
+          const text = encodeURIComponent("Check out this Agentic AI insight from the Pulse Archive!");
+          
+          const links = {
+            x: `https://x.com/intent/tweet?text=${text}&url=${url}`,
+            linkedin: `https://www.linkedin.com/sharing/share-offsite/?url=${url}`
+          };
+          
+          window.open(links[platform], '_blank');
+          shareMenu?.classList.remove('active');
+        };
+
+        window.copyLink = () => {
+          const fullUrl = `${window.location.origin}/pulse/${currentSharedSlug}`;
+          navigator.clipboard.writeText(fullUrl);
+          alert("Link copied to clipboard!");
+          shareMenu?.classList.remove('active');
+        };
+
+        // Close menu if clicking outside
+        document.addEventListener('click', () => shareMenu?.classList.remove('active'));
+
+        // --- 4. SIDEBAR AUTO-HIGHLIGHT LOGIC ---
+        const observerOptions = {
+          root: null, // use the viewport
+          rootMargin: '-10% 0px -70% 0px', // trigger when section is in the top portion of the screen
+          threshold: 0
+        };
+
+        const observerCallback = (entries) => {
+          entries.forEach(entry => {
+            if (entry.isIntersecting) {
+              // 1. Get the ID of the visible section
+              const id = entry.target.getAttribute('id');
+              
+              // 2. Remove 'active' class from all sidebar links
+              document.querySelectorAll('.toc-month-link, .toc-week-link').forEach(link => {
+                link.classList.remove('active');
+              });
+
+              // 3. Add 'active' class to the matching sidebar link
+              const activeLink = document.querySelector(`a[href="#${id}"]`);
+              if (activeLink) {
+                activeLink.classList.add('active');
+                
+                // 4. If it's a week link, also highlight the parent month
+                if (activeLink.classList.contains('toc-week-link')) {
+                  const parentMonth = activeLink.closest('.toc-month-section')?.querySelector('.toc-month-link');
+                  parentMonth?.classList.add('active');
+                }
+              }
+            }
+          });
+        };
+
+        const observer = new IntersectionObserver(observerCallback, observerOptions);
+
+        // Track all month and week blocks
+        document.querySelectorAll('.month-block, .week-block').forEach(section => {
+          observer.observe(section);
+        });
+
+        // --- BACK TO TOP LOGIC ---
+        const backToTop = document.getElementById('back-to-top');
+
+        window.addEventListener('scroll', () => {
+          if (window.scrollY > 500) {
+            backToTop.classList.add('visible');
+          } else {
+            backToTop.classList.remove('visible');
+          }
+        });
+
+        backToTop.addEventListener('click', () => {
+          window.scrollTo({
+            top: 0,
+            behavior: 'smooth'
+          });
+        });
+
+        // --- SMOOTH SCROLL OFFSET FIX ---
+        // This ensures that when you click a sidebar link, it doesn't jump too far down
+        document.querySelectorAll('.toc-month-link, .toc-week-link').forEach(anchor => {
+          anchor.addEventListener('click', function (e) {
+            e.preventDefault();
+            const targetId = this.getAttribute('href');
+            const targetElement = document.querySelector(targetId);
+            
+            if (targetElement) {
+              window.scrollTo({
+                top: targetElement.offsetTop - 100, // Adjust this number to match your header height
+                behavior: 'smooth'
+              });
+            }
+          });
+        });
+
+        </script>

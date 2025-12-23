@@ -1,8 +1,14 @@
 import { defineConfig } from 'astro/config';
 import tailwind from '@astrojs/tailwind';
+import { defineConfig } from 'astro/config';
+import node from '@astrojs/node'; // or cloudflare/vercel/netlify
 
 export default defineConfig({
   integrations: [tailwind()],
+  output: 'server', // Changes from static to server-ready
+  adapter: node({
+    mode: 'standalone',
+  }),
   markdown: {
     shikiConfig: {
       // You can choose from Shiki's built-in themes
